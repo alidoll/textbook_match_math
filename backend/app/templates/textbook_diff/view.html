@@ -8,7 +8,7 @@
   {% include "_theme_css.html" %}
   <link rel="stylesheet" href="/static/old_library/annotate.css?v={{ static_v }}">
   <link rel="stylesheet" href="/static/textbook_diff/view.css?v={{ static_v }}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/katex/katex.min.css?v={{ static_v }}">
 </head>
 <body class="diff-view-layout">
   <header class="diff-view-hero">
@@ -193,7 +193,7 @@
       hub_label: {{ hub_label|default('教材对比首页', true)|tojson }},
     };
   </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="/static/katex/katex.min.js?v={{ static_v }}"></script>
   <script src="/static/textbook_diff/view.js?v={{ static_v }}"></script>
 </body>
 </html>
