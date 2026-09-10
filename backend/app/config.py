@@ -28,8 +28,12 @@ class Config:
         }
         if _USE_MYSQL
         # SQLite：busy_timeout 30s，允许跨线程（Flask threaded=True + 后台管线线程）
+        # 整册一键 5 路并行 × 每页 2 worker = 10 连接 + 前台请求，需足够池大小
         else {
             "connect_args": {"timeout": 30, "check_same_thread": False},
+            "pool_size": 20,
+            "max_overflow": 30,
+            "pool_timeout": 60,
         }
     )
     # 整册教材 PDF 上传上限（默认 2048MB；扫描彩印常超过 512）
