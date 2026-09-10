@@ -134,7 +134,25 @@ def _start_parse_in_background(volume_code: str, **kwargs) -> None:
 
     def worker() -> None:
         with app.app_context():
-            parse_diff_volume_pdf(volume_code=volume_code, **kwargs)
+            try:
+                parse_diff_volume_pdf(volume_code=volume_code, **kwargs)
+            except Exception as exc:
+                import logging
+                import traceback
+
+                logger = logging.getLogger(__name__)
+                logger.exception("划分页码后台线程异常: %s", exc)
+                # 写入数据库，避免状态卡在 processing
+                try:
+                    from ...models import Volume
+
+                    vol = Volume.query.filter_by(volume_code=volume_code).first()
+                    if vol:
+                        vol.parse_status = "failed"
+                        vol.parse_error = f"后台线程异常: {exc}\n{traceback.format_exc()[:1500]}"
+                        db.session.commit()
+                except Exception:
+                    db.session.rollback()
 
     threading.Thread(target=worker, daemon=True, name=f"diff-parse-{volume_code}").start()
 

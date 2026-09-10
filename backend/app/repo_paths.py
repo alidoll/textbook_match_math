@@ -9,11 +9,16 @@ from pathlib import Path
 def app_root() -> Path:
     """运行时数据根目录。
 
-    打包后（PyInstaller frozen）：exe 同级目录（用户数据、.env、data/ 都在这里）。
+    打包后（PyInstaller frozen）：exe 上级目录的 TextbookMatch-Data/ 文件夹
+    （与 exe 同级但独立，PyInstaller 重新构建 dist/ 时不会丢数据）。
     开发时：仓库根目录。
     """
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
+        exe_dir = Path(sys.executable).resolve().parent
+        # exe 在 dist/TextbookMatch/ 下，数据放在 dist/TextbookMatch-Data/
+        data_dir = exe_dir.parent / "TextbookMatch-Data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        return data_dir
     return Path(__file__).resolve().parents[2]
 
 
