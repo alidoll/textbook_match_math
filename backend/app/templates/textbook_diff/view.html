@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>教材页面对照 · 教材对比</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/annotate.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_diff/view.css?v={{ static_v }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+</head>
+<body class="diff-view-layout">
+  <header class="diff-view-hero">
+    <div class="diff-view-hero-inner">
+      <div class="diff-view-hero-top">
+        <nav class="app-top-nav" aria-label="顶部导航">
+          {% include "_nav_home.html" %}
+          <a class="diff-view-back" id="back-link" href="{{ back_url|default('/textbook-diff/', true) }}">← {{ back_label|default('返回', true) }}</a>
+        </nav>
+        <div class="diff-view-heading">
+          <h1 id="view-title">页面对照</h1>
+          <p class="diff-view-meta" id="view-meta"></p>
+        </div>
+        <div class="diff-view-status-cluster">
+          <div class="diff-reuse-suggest" id="lesson-reuse-suggest" hidden>
+            <span class="diff-reuse-suggest-kicker">课件建议</span>
+            <div class="diff-reuse-suggest-opts" role="radiogroup" aria-label="课件建议">
+              <label class="diff-reuse-opt" data-value="new">
+                <input type="radio" name="lesson-reuse" value="new" />
+                <span>新制</span>
+              </label>
+              <label class="diff-reuse-opt" data-value="reuse">
+                <input type="radio" name="lesson-reuse" value="reuse" />
+                <span>直接复用</span>
+              </label>
+            </div>
+            <span class="diff-reuse-suggest-reason" id="lesson-reuse-reason"></span>
+          </div>
+          <span class="badge-pair-status" id="pair-status-badge" hidden></span>
+          <button type="button" class="btn btn-sm" id="btn-confirm-lesson" hidden title="看完本课对比结果后确认">确认本课对比</button>
+        </div>
+      </div>
+
+      <nav class="diff-view-toolbar" aria-label="页面对照操作">
+        <div class="diff-view-toolbar-group diff-view-toolbar-group--pipeline">
+          <div class="diff-view-pipeline-row">
+            <button type="button" class="btn btn-sm diff-view-btn-primary" id="btn-page-one-click" title="有缓存则跳过；分步按钮仍可单独重跑">本页一键</button>
+            <button type="button" class="btn btn-sm secondary" id="btn-lesson-pipeline" hidden title="对本课所有页跑 ①→④（有缓存跳过）">整课一键</button>
+            <button type="button" class="btn btn-sm secondary" id="btn-xiaoke-ocr-new-lesson" hidden
+              title="先旧侧全部页 OCR → 再新侧全部页 OCR → 合成整课并用大模型匹配文字块">整课一键</button>
+            <button type="button" class="btn btn-sm secondary" id="btn-xiaoke-textbook-block-trial" hidden
+              title="复用本页文字+图片 OCR → 图文共建块 → 单块对照（不重跑 OCR）">教材轨试验</button>
+            <div class="diff-view-step-rail" id="page-compare-step-rail" role="group" aria-label="分步流程">
+              <div class="diff-view-steps" role="group" aria-label="文字轨">
+                <button type="button" class="btn btn-sm secondary" id="btn-sync-ocr-text">① 文字 OCR</button>
+                <button type="button" class="btn btn-sm secondary" id="btn-text-compare">② 文字比对</button>
+              </div>
+              <span class="diff-view-step-divider" aria-hidden="true"></span>
+              <div class="diff-view-steps" role="group" aria-label="图片轨">
+                <button type="button" class="btn btn-sm secondary" id="btn-sync-ocr-image">③ 图片 OCR</button>
+                <button type="button" class="btn btn-sm secondary" id="btn-image-compare">④ 图片比对</button>
+              </div>
+            </div>
+          </div>
+          <p class="hint diff-view-atom-legend" id="atom-diff-legend" hidden>
+            原子框：<span class="is-diff-delete">删</span>
+            <span class="is-diff-add">增</span>
+            <span class="is-diff-modify">改</span>
+            <span class="is-diff-crosspage">跨页/移动</span>
+          </p>
+        </div>
+
+        <div class="diff-view-toolbar-group diff-view-toolbar-group--phase" id="xiaoke-phase-tools" hidden>
+          <span class="diff-view-phase-kicker">教学环节</span>
+          <button type="button" class="diff-overlay-layer-btn is-active" id="btn-xiaoke-phase-compare"
+            title="页图显示环节框，右侧列出环节对照">环节对比</button>
+          <button type="button" class="btn btn-sm secondary" id="btn-xiaoke-phase-segment"
+            title="划分教学环节。没有文字时只补文字识别，不跑图片 OCR 和文字块比对">环节整理</button>
+          <p class="hint diff-view-atom-legend" id="phase-diff-legend">
+            环节框：<span class="is-phase-legend-large">大改</span>
+            <span class="is-phase-legend-medium">中改</span>
+            <span class="is-phase-legend-small">小改</span>
+          </p>
+        </div>
+        <div class="diff-view-toolbar-group diff-view-toolbar-group--nav">
+          <div class="diff-view-page-nav diff-view-page-nav--top" id="lesson-page-nav" hidden>
+            <button type="button" class="btn btn-sm secondary" id="prev-page-btn" hidden>上一页</button>
+            <span class="diff-view-page-label" id="page-nav-label"></span>
+            <button type="button" class="btn btn-sm secondary" id="next-page-btn" hidden>下一页</button>
+          </div>
+          <label class="diff-view-overlay-toggle" id="overlay-toggle-wrap">
+            <input type="checkbox" id="toggle-atom-overlay" checked />
+            <span>显示原子框</span>
+          </label>
+          <button type="button" class="btn btn-sm secondary" id="btn-download-compare"
+            title="导出本页文字比对与图片比对为 Excel（两个工作表）">下载对比</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="diff-view-grid">
+    <section class="card diff-view-col diff-view-col--old">
+      <h2 class="diff-view-col-title">旧教材 <span id="old-vol-label"></span></h2>
+      <p class="diff-view-lesson" id="old-lesson-label"></p>
+      <p class="hint diff-view-old-len-hint" id="old-page-len-hint" hidden></p>
+      <div class="diff-view-pages" id="old-pages-list" aria-label="旧教材全部页"></div>
+      <details class="diff-view-side-advanced">
+        <summary>仅重跑本侧（当前选中页）</summary>
+        <nav class="diff-view-col-toolbar" aria-label="旧页 OCR">
+          <button type="button" class="btn btn-sm secondary" id="btn-old-ocr-text" data-side="old" data-phase="text">① 文字</button>
+          <button type="button" class="btn btn-sm secondary" id="btn-old-ocr-image" data-side="old" data-phase="images">③ 图片</button>
+        </nav>
+      </details>
+    </section>
+
+    <section class="card diff-view-col diff-view-col--new">
+      <h2 class="diff-view-col-title">新教材 / 预览 <span id="new-vol-label"></span></h2>
+      <p class="diff-view-lesson" id="new-lesson-label"></p>
+      <p class="hint diff-view-pages-hint" id="pages-select-hint">点击页图切换当前比对页</p>
+      <div class="diff-view-pages" id="new-pages-list" aria-label="新教材全部页"></div>
+      <details class="diff-view-side-advanced">
+        <summary>仅重跑本侧（当前选中页）</summary>
+        <nav class="diff-view-col-toolbar" aria-label="新页 OCR">
+          <button type="button" class="btn btn-sm secondary" id="btn-new-ocr-text" data-side="new" data-phase="text">① 文字</button>
+          <button type="button" class="btn btn-sm secondary" id="btn-new-ocr-image" data-side="new" data-phase="images">③ 图片</button>
+        </nav>
+      </details>
+    </section>
+
+    <aside class="card diff-view-panel">
+      <h2 class="diff-view-col-title"><span id="panel-compare-title">单页比对</span> <span id="panel-page-label"></span></h2>
+      <div id="atom-summary" class="diff-atom-summary"></div>
+      <nav class="diff-result-tabs" id="result-tabs" hidden aria-label="比对结果">
+        <button type="button" class="diff-result-tab is-active" id="tab-result-text" data-tab="text">② 文字比对</button>
+        <button type="button" class="diff-result-tab" id="tab-result-image" data-tab="image">④ 图片比对</button>
+        <button type="button" class="diff-result-tab" id="tab-result-lesson" data-tab="lesson" hidden>整课比对</button>
+        <button type="button" class="diff-result-tab" id="tab-result-section" data-tab="section" hidden>栏目块比对</button>
+      </nav>
+      <div id="lesson-phase-panel" class="diff-lesson-compare diff-lesson-phase" hidden>
+        <div id="lesson-phase-summary" class="diff-compare-summary-line"></div>
+        <nav class="diff-phase-toggle" id="lesson-phase-toggle" hidden aria-label="对比视图切换">
+          <button type="button" class="diff-phase-toggle-btn is-active" data-phase-view="phase">环节对比</button>
+          <button type="button" class="diff-phase-toggle-btn" data-phase-view="text">文字对比</button>
+          <button type="button" class="diff-phase-toggle-btn" data-phase-view="image">图片对比</button>
+        </nav>
+        <div id="lesson-phase-rows" class="diff-block-pairs"></div>
+      </div>
+      <div id="lesson-compare-panel" class="diff-lesson-compare" hidden>
+        <div id="lesson-compare-summary" class="diff-compare-summary-line"></div>
+        <div id="lesson-atom-rows" class="diff-block-pairs"></div>
+      </div>
+      <div id="section-block-panel" class="diff-lesson-compare" hidden>
+        <div id="section-block-summary" class="diff-compare-summary-line"></div>
+        <div id="section-block-rows" class="diff-block-pairs"></div>
+      </div>
+      <div id="text-compare-summary" class="diff-compare-summary-line" hidden></div>
+      <div id="image-compare-summary" class="diff-compare-summary-line diff-compare-summary-line--image" hidden></div>
+      <div id="text-block-pairs" class="diff-block-pairs" hidden></div>
+      <div id="image-block-pairs" class="diff-block-pairs diff-block-pairs--image" hidden></div>
+      <div class="diff-atom-catalog-grid" id="atom-catalog-wrap" hidden>
+        <div class="diff-atom-catalog-col diff-atom-catalog-col--old">
+          <h3 class="diff-atom-catalog-title">旧教材原子</h3>
+          <div id="atom-old-list" class="diff-atom-catalog-list" role="list"></div>
+        </div>
+        <div class="diff-atom-catalog-col diff-atom-catalog-col--new">
+          <h3 class="diff-atom-catalog-title">新教材原子</h3>
+          <div id="atom-new-list" class="diff-atom-catalog-list" role="list"></div>
+        </div>
+      </div>
+      <div id="atom-status" class="diff-atom-status">加载中…</div>
+    </aside>
+  </div>
+
+  <div id="toast" class="diff-view-toast" hidden></div>
+  <script>
+    window.DIFF_VIEW_PARAMS = {
+      old_code: {{ old_code|tojson }},
+      new_code: {{ new_code|tojson }},
+      mode: {{ mode|tojson }},
+      old_page: {{ old_page|tojson }},
+      new_page: {{ new_page|tojson }},
+      new_lesson_uid: {{ new_lesson_uid|tojson }},
+      page_index: {{ page_index|tojson }},
+      new_pdf_source: {{ new_pdf_source|tojson }},
+      preview_blob_id: {{ preview_blob_id|tojson }},
+      from: {{ from_hub|default('', true)|tojson }},
+      subject: {{ subject|default('', true)|tojson }},
+      back_url: {{ back_url|default('/textbook-diff/', true)|tojson }},
+      back_label: {{ back_label|default('教材对比首页', true)|tojson }},
+      hub_url: {{ hub_url|default('/textbook-diff/', true)|tojson }},
+      hub_label: {{ hub_label|default('教材对比首页', true)|tojson }},
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script src="/static/textbook_diff/view.js?v={{ static_v }}"></script>
+</body>
+</html>

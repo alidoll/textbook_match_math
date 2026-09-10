@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>册次副本 · 教材库</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/home.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_library/shelf.css?v={{ static_v }}">
+</head>
+<body class="lib-page">
+  <header class="lib-top">
+    <a class="lib-back" id="slot-back" href="/textbook-library/">← 馆藏架</a>
+    <h1 class="lib-title" id="slot-title">册次副本</h1>
+    <p class="lib-lead" id="slot-lead">同一册次可追加多个教材副本（按显示名区分）</p>
+  </header>
+  <div class="lib-slot-actions">
+    <button type="button" class="lib-pill-btn" id="btn-append">追加副本</button>
+    <button type="button" class="lib-pill-btn lib-pill-btn--ghost" id="btn-manage">管理</button>
+    <button type="button" class="lib-pill-btn lib-pill-btn--danger" id="btn-delete-selected" hidden>删除所选 (0)</button>
+    <button type="button" class="lib-pill-btn lib-pill-btn--ghost" id="btn-manage-done" hidden>完成</button>
+  </div>
+  <section class="lib-case">
+    <div class="lib-cornice" aria-hidden="true"></div>
+    <div class="lib-grid" id="slot-grid">
+      <p class="lib-empty">加载副本…</p>
+    </div>
+    <div class="lib-plank" aria-hidden="true"></div>
+  </section>
+  <script src="/static/textbook_library/slot.js?v={{ static_v }}"></script>
+</body>
+</html>

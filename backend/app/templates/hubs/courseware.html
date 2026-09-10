@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>课件制作 · 新课件库</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/home.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/courseware/hub.css?v={{ static_v }}">
+</head>
+<body class="home-page home-page-hub">
+  <header class="home-hero">
+    <div class="home-hero-inner">
+      <p class="home-hub-back"><a href="/">← 首页</a></p>
+      <h1>课件制作</h1>
+      <p class="home-lead">新课件薄仓：挂到新课 → OCR → 供选题读取 KP（不做编辑器）</p>
+    </div>
+  </header>
+  <main class="home-hub-panel cw-main">
+    <section class="cw-card">
+      <label>版本 <input id="ed" placeholder="冀人"></label>
+      <label>年级 <input id="gr" placeholder="5" style="width:4rem"></label>
+      <label>学期 <input id="sem" placeholder="上" style="width:4rem"></label>
+      <button type="button" id="btn-load" class="cw-btn">加载新课</button>
+    </section>
+    <section class="cw-card">
+      <table class="cw-table">
+        <thead><tr><th>课</th><th>操作</th></tr></thead>
+        <tbody id="tb"><tr><td colspan="2">先加载</td></tr></tbody>
+      </table>
+    </section>
+    <section class="cw-card" id="detail" hidden>
+      <h2 id="d-title"></h2>
+      <p class="cw-hint">课已自动选定。可上传：扫描/文字 PDF、单张课件页图（png/jpg）、或与旧库相同的「幻灯片图 ZIP」。识别复用旧课件豆包 OCR + 教材比对页 OCR，失败再 RapidOCR（可能需数十秒）。</p>
+      <p id="status" class="cw-status" aria-live="polite"></p>
+      <input type="file" id="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.webp,.ppt,.pptx,.txt,application/pdf,application/zip,image/*">
+      <button type="button" id="btn-up" class="cw-btn">上传</button>
+      <button type="button" id="btn-ocr" class="cw-btn" disabled>跑 OCR</button>
+      <pre id="out"></pre>
+    </section>
+  </main>
+  <footer class="home-footer">courseware hub · thin store</footer>
+  <script src="/static/courseware/hub.js?v={{ static_v }}"></script>
+</body>
+</html>

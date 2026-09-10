@@ -1,0 +1,163 @@
+/* 融合方案：轨道粒子 + 叙事大屏 + 侧栏飞入 + 底部四步流程 */
+#pair-panel.showcase-mode-hybrid.showcase-playing {
+  pointer-events: none;
+}
+#pair-panel.showcase-mode-hybrid.showcase-playing .db-stage-controls,
+#pair-panel.showcase-mode-hybrid.showcase-playing .showcase-pipeline {
+  pointer-events: auto;
+}
+#pair-panel.showcase-mode-hybrid #showcase-sim-screen {
+  display: none !important;
+}
+#pair-panel.showcase-mode-hybrid #showcase-doubao-stage {
+  display: flex !important;
+}
+#pair-panel.showcase-mode-hybrid #showcase-pipeline,
+#pair-panel.showcase-mode-hybrid #showcase-tagline {
+  display: block !important;
+  position: relative;
+  z-index: 10;
+}
+#pair-panel.showcase-mode-hybrid .showcase-theater {
+  justify-content: flex-end;
+  padding-bottom: 4px;
+}
+#pair-panel.showcase-mode-hybrid .showcase-pipeline-center {
+  opacity: 0.85;
+  margin-top: 0;
+  padding-top: 6px;
+}
+#pair-panel.showcase-mode-hybrid.showcase-playing .pair-blocks-col {
+  opacity: 0.22;
+  filter: none;
+  transition: opacity 0.7s ease;
+}
+#pair-panel.showcase-mode-hybrid.showcase-playing.showcase-old-lit .old-blocks-col,
+#pair-panel.showcase-mode-hybrid.showcase-playing.showcase-new-lit .new-blocks-col {
+  opacity: 1;
+}
+
+/* HUD 在融合模式更淡，叙事面板为主 */
+#pair-panel.showcase-mode-hybrid .db-hud {
+  opacity: 0.28;
+  transform: scale(0.82);
+}
+#pair-panel.showcase-mode-hybrid .db-hud.is-active {
+  opacity: 0.55;
+}
+
+.hybrid-narrative-wrap {
+  position: absolute;
+  left: 50%;
+  top: 2%;
+  transform: translateX(-50%);
+  width: min(94%, 420px);
+  z-index: 9;
+  pointer-events: none;
+}
+.hybrid-narrative-wrap[hidden] {
+  display: none !important;
+}
+.hybrid-narrative {
+  padding: 12px 14px 10px;
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.82);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  animation: hybrid-narrative-in 0.45s ease-out;
+}
+@keyframes hybrid-narrative-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hybrid-narrative .sim-screen-inner {
+  max-width: none;
+}
+.hybrid-narrative .sim-hero-title {
+  font-size: clamp(20px, 3.2vw, 26px);
+  margin-bottom: 4px;
+}
+.hybrid-narrative .sim-hero-sub {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.hybrid-narrative .sim-kicker {
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+.hybrid-narrative .sim-counter-val {
+  font-size: 44px;
+}
+.hybrid-narrative .sim-big-counter {
+  margin: 6px 0 6px;
+}
+.hybrid-narrative .sim-progress-track-lg {
+  height: 4px;
+  margin-bottom: 8px;
+}
+.hybrid-narrative .sim-terminal {
+  font-size: 10px;
+  padding: 6px 8px;
+  max-width: none;
+}
+.hybrid-narrative .sim-target-card {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+.hybrid-narrative .sim-target-id {
+  font-size: 20px;
+}
+.hybrid-narrative .sim-scanner-frame {
+  height: 52px;
+  margin-bottom: 8px;
+}
+.hybrid-narrative .sim-result-line {
+  font-size: 11px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+.hybrid-narrative .sim-radar {
+  width: 88px;
+  height: 88px;
+}
+.hybrid-narrative .sim-radar-wrap {
+  margin: 4px 0 8px;
+}
+.hybrid-narrative .sim-match-list {
+  max-height: 108px;
+  overflow: hidden;
+}
+.hybrid-narrative .sim-match-item {
+  padding: 5px 8px;
+  font-size: 11px;
+  grid-template-columns: 48px 1fr auto;
+}
+.hybrid-narrative .sim-done-ring {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+.hybrid-narrative .sim-pulse-ring {
+  width: 80px;
+  height: 80px;
+  margin: -40px 0 0 -40px;
+  top: 15%;
+}
+
+#pair-panel.showcase-mode-hybrid .db-orbit-canvas {
+  margin-top: 0;
+  min-height: 200px;
+  max-height: 58%;
+}
+#pair-panel.showcase-mode-hybrid .db-stage-caption {
+  font-size: 12px;
+  padding: 4px 12px 2px;
+}
+#pair-panel.showcase-mode-hybrid .db-stage-progress {
+  padding-bottom: 4px;
+}
+
+#pair-panel.showcase-mode-hybrid.is-speed-fast {
+  --hybrid-speed: 0.68;
+}

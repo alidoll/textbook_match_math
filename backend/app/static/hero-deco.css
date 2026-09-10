@@ -1,0 +1,75 @@
+/* Coral Blush hero — apple illustration (right side) */
+.wb-hero,
+.intake-hero,
+.home-hero,
+.diff-hero,
+.diff-intake-hero,
+.diff-compare-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.wb-hero::after,
+.intake-hero::after,
+.home-hero::after,
+.diff-hero::after,
+.diff-intake-hero::after,
+.diff-compare-hero::after {
+  content: "";
+  position: absolute;
+  right: max(12px, calc((100% - 1120px) / 2));
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(220px, 34vw);
+  height: min(220px, 34vw);
+  background: url("/static/hero-apple.svg") no-repeat center / contain;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.wb-hero-inner,
+.intake-hero-inner,
+.home-hero-inner,
+.diff-hero-inner,
+.diff-intake-hero-inner,
+.diff-compare-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Negative-margin panels overlap hero; must sit above hero's stacking layer */
+.wb-main,
+.intake-main,
+.home-actions,
+.diff-main,
+.workbook-main,
+.diff-actions,
+.diff-intake-main,
+.diff-compare-main {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 720px) {
+  .wb-hero::after,
+  .intake-hero::after,
+  .home-hero::after,
+  .diff-hero::after,
+  .diff-intake-hero::after,
+  .diff-compare-hero::after {
+    width: min(140px, 38vw);
+    height: min(140px, 38vw);
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 480px) {
+  .wb-hero::after,
+  .intake-hero::after,
+  .home-hero::after,
+  .diff-hero::after,
+  .diff-intake-hero::after,
+  .diff-compare-hero::after {
+    display: none;
+  }
+}

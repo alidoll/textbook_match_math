@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新旧对比 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/compare_results.css?v={{ static_v }}">
+</head>
+<body class="workbench-page workbench-compare">
+  <header class="wb-hero wb-hero--compare">
+    <div class="wb-hero-inner">
+      <a class="wb-back" href="{% if is_pipeline_shell %}/xiaoke-workbench/{% else %}/{% endif %}">← {% if is_pipeline_shell %}小科完整工作台{% else %}首页{% endif %}</a>
+      <h1>新旧对比</h1>
+      <p class="wb-lead">按课终审区块复用判定 · 批量导出改稿清单</p>
+      <ol class="wb-flow" aria-label="对比流程">
+        <li class="wb-flow-done"><span class="wb-flow-num">1</span>新库建块完成</li>
+        <li class="wb-flow-active" aria-current="step"><span class="wb-flow-num">2</span>按课终审 AI 建议</li>
+        <li><span class="wb-flow-num">3</span>教研确认 · 导出</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="wb-main cr-main">
+    <section class="cr-toolbar card">
+      <div class="cr-filters">
+        <label class="cr-filter">
+          <span>状态</span>
+          <select id="filter-status">
+            <option value="all">全部</option>
+            <option value="pending" selected>待对比</option>
+            <option value="confirmed">已确认</option>
+            <option value="no_blocks">未建块</option>
+          </select>
+        </label>
+        <label class="cr-filter">
+          <span>册次</span>
+          <select id="filter-volume">
+            <option value="">全部册次</option>
+          </select>
+        </label>
+      </div>
+      <div id="cr-summary" class="cr-summary">加载中…</div>
+    </section>
+
+    <section id="cr-volumes" class="cr-volumes">
+      <p class="wb-loading">加载对比任务…</p>
+    </section>
+  </main>
+
+  <div id="toast" class="wb-toast" hidden></div>
+  <script src="/static/new_library/compare_results.js?v={{ static_v }}"></script>
+</body>
+</html>

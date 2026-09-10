@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>教材对比 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/textbook_diff/compare.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_diff/intake_compare.css?v={{ static_v }}">
+</head>
+<body class="diff-compare-page diff-intake-compare">
+  <header class="diff-compare-hero">
+    <div class="diff-compare-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        {% include "_nav_home.html" %}
+        <a class="diff-compare-back" id="back-link" href="/textbook-diff/">← 返回 intake</a>
+      </nav>
+      <h1 id="page-title">教材对比</h1>
+      <p class="diff-compare-lead" id="page-lead">加载中…</p>
+    </div>
+  </header>
+
+  <main class="diff-compare-main">
+    <section class="card diff-intake-steps" id="steps-panel" hidden>
+      <h3 class="diff-section-title">建设进度</h3>
+      <ol class="diff-intake-step-list" id="step-list"></ol>
+    </section>
+
+    <section class="card diff-intake-blockers" id="blockers-panel" hidden>
+      <h3 class="diff-section-title">请先完成</h3>
+      <ul id="blockers-list"></ul>
+    </section>
+
+    <section id="compare-hint" class="diff-compare-hint card" hidden></section>
+
+    <section id="full-result" hidden>
+      <div class="card diff-preview-list-wrap">
+        <div class="diff-intake-toolbar">
+          <h3 class="diff-section-title">课时粗分对照</h3>
+          <span class="diff-intake-pair-label" id="pair-label"></span>
+        </div>
+        <p class="diff-list-lead">同版本 · 同年级 · 同学期旧教材课时。每行点「对比」进入左旧右新工作台。</p>
+        <div class="diff-lesson-pair-list" id="lesson-pair-list"></div>
+      </div>
+    </section>
+
+    <section id="draft-result" hidden>
+      <div class="diff-preview-summary card" id="preview-summary" hidden></div>
+      <div class="card diff-preview-list-wrap">
+        <div class="diff-intake-toolbar">
+          <h3 class="diff-section-title">修订版预览页粗分</h3>
+          <button type="button" class="btn btn-sm secondary" id="refresh-draft-btn">重新粗分</button>
+        </div>
+        <p class="diff-list-lead">从旧教材中匹配最接近页/课时。每行点「对比」进入左旧右新工作台。</p>
+        <div class="diff-preview-list" id="preview-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="diff-compare-toast" hidden></div>
+  <script>
+    window.DIFF_INTAKE_COMPARE_CODE = {{ volume_code|default('', true)|tojson }};
+    window.DIFF_INTAKE_COMPARE_KIND = {{ kind|default('full', true)|tojson }};
+    window.DIFF_INTAKE_PREVIEW_BLOB_ID = {{ preview_blob_id|default('', true)|tojson }};
+  </script>
+  <script src="/static/textbook_diff/intake_compare.js?v={{ static_v }}"></script>
+</body>
+</html>

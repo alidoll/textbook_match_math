@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新旧对比 · {{ page_title }}</title>
+  {% include "_favicon.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/annotate.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/compare.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/compare_showcase_doubao.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/compare_showcase_hybrid.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/compare_showcase_v4.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/compare_audit.css?v={{ static_v }}">
+</head>
+<body class="compare-layout">
+  <header class="compare-chrome">
+    <div class="compare-chrome-top">
+      <a class="compare-chrome-back" id="link-back-context" href="/new-library/compare-results">← 工作台</a>
+      <div class="compare-chrome-titleline">
+        <span class="compare-chrome-vol" id="hero-volume"></span>
+        <h1 id="page-title">{{ page_title }}</h1>
+        <span class="compare-chrome-sep" aria-hidden="true">·</span>
+        <span class="compare-chrome-status is-draft" id="hero-status">加载中…</span>
+      </div>
+      <nav class="compare-chrome-nav">
+        <a class="compare-chrome-nav-link" id="link-volume-workbench" href="/new-library/compare-results">本册</a>
+        <a class="compare-chrome-nav-link" id="link-next-lesson" href="#" hidden>下一课</a>
+      </nav>
+    </div>
+    <div class="compare-chrome-tools compare-toolbar">
+      <div class="toolbar-group toolbar-group-stages" aria-label="审核阶段">
+        <span class="toolbar-group-label">阶段</span>
+        <button type="button" class="btn btn-xs btn-primary view-tab active" id="btn-view-pair" title="展示旧新库拉取、建块与配对全貌">① 对照总览</button>
+        <button type="button" class="btn btn-xs btn-outline view-tab" id="btn-view-workbench" title="逐块队列 + 对照画布 + 判定">② 逐块审核</button>
+        <button type="button" class="btn btn-xs btn-outline view-tab" id="btn-view-review" title="汇总表格终审与导出">③ 表格终审</button>
+      </div>
+
+      <div class="toolbar-stage" data-toolbar-stage="pair" id="toolbar-stage-pair">
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group" aria-label="建块入口">
+          <span class="toolbar-group-label">建块</span>
+          <a class="btn btn-xs btn-outline toolbar-link-btn" id="link-annotate-nav" href="#" title="在新教材侧调整区块与锚定">新侧建块</a>
+          <a class="btn btn-xs btn-outline toolbar-link-btn" id="link-old-annotate-nav" href="#" hidden title="在旧课件侧调整区块">旧侧建块</a>
+        </div>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group" aria-label="配对">
+          <span class="toolbar-group-label">配对</span>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-apply-anchor" title="从 annotate 锚定表导入配对">锚定导入</button>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-add-match" title="手动选择旧块与新块建立配对">添加配对</button>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-showcase-replay" title="重播资源拉取与配对展示动画">重播展示</button>
+        </div>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <button type="button" class="btn btn-xs btn-primary" id="btn-go-workbench" title="浏览完对照总览后进入逐块判定">进入逐块审核 →</button>
+      </div>
+
+      <div class="toolbar-stage" data-toolbar-stage="workbench" id="toolbar-stage-workbench" hidden>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group" aria-label="逐块审核">
+          <span class="toolbar-group-label">审核</span>
+          <button type="button" class="btn btn-xs btn-primary" id="btn-auto-suggest" title="调用 AI 为配对生成复用判定建议">AI 建议</button>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-apply-all-ai" title="将 AI 建议填入所有空的教研判定栏">全部采纳</button>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-feedback-global" title="提交 AI 判定或流程意见">意见反馈</button>
+        </div>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <button type="button" class="btn btn-xs btn-outline" id="btn-go-review" title="全部区块判定完成后进入终审">进入表格终审 →</button>
+      </div>
+
+      <div class="toolbar-stage" data-toolbar-stage="review" id="toolbar-stage-review" hidden>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group" aria-label="成果交付">
+          <span class="toolbar-group-label">交付</span>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-refresh-report" title="汇总复用报告并写入 export.json">保存汇总</button>
+          <details class="compare-toolbar-more compare-export-more">
+            <summary class="btn btn-xs btn-outline" title="下载教研确认后的成果文件">下载成果</summary>
+            <div class="compare-toolbar-more-menu">
+              <button type="button" class="btn btn-sm btn-outline" id="btn-export-xlsx">Excel 修改清单</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btn-export-json">JSON 数据</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btn-export-pptx">PPTX 课件</button>
+            </div>
+          </details>
+          <button type="button" class="btn btn-xs btn-success" id="btn-confirm" title="锁定本课对比结果，锁定后需解锁才能继续编辑">教研已确认</button>
+          <button type="button" class="btn btn-xs btn-outline" id="btn-unlock" hidden title="解除锁定，继续编辑判定与配对">解锁编辑</button>
+        </div>
+      </div>
+
+      <span class="compare-spacer"></span>
+    </div>
+  </header>
+
+  <main class="compare-main">
+    <div id="workbench-panel" class="compare-view-panel" hidden>
+      <div class="audit-shell" id="audit-shell">
+        <div class="audit-body">
+          <aside class="audit-queue">
+            <div class="audit-queue-head">
+              <span>区块队列 <strong id="audit-queue-count">0</strong></span>
+              <select id="audit-page-filter" class="audit-page-filter" title="按新教材页筛选">
+                <option value="">全部页</option>
+              </select>
+            </div>
+            <div class="audit-queue-legend" id="audit-queue-legend"></div>
+            <div class="audit-queue-list" id="audit-queue-list"></div>
+          </aside>
+          <section class="audit-canvas">
+            <div class="audit-canvas-toolbar">
+              <span id="wb-preview-hint" class="audit-canvas-title">选择区块查看教材、课件对照</span>
+              <div class="audit-canvas-tools">
+                <button type="button" class="btn btn-sm btn-outline" id="btn-toggle-judge" title="收起或展开右侧判定面板">隐藏判定栏 ◀</button>
+              </div>
+            </div>
+            <div class="audit-canvas-body wb-preview-body" id="wb-preview">
+              <div class="pair-preview-empty">从左侧队列选择一条匹配开始审核</div>
+            </div>
+          </section>
+          <aside class="audit-judge" id="audit-judge-panel">
+            <div class="audit-judge-head">区块判定</div>
+            <div class="audit-judge-body wb-detail-body" id="wb-detail-content">
+              <div class="pair-detail-empty">选中一条匹配后填写判定</div>
+            </div>
+            <div class="audit-judge-foot">
+              <button type="button" class="btn btn-sm btn-outline" id="btn-prev-block" title="队列中上一项（↑ 键）">↑ 上一块</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btn-next-block" title="队列中下一项（↓ 键）">下一块 ↓</button>
+            </div>
+          </aside>
+        </div>
+        <footer class="audit-lesson-bar">
+          <div class="audit-lesson-summary" id="audit-lesson-summary">课时洞察加载中…</div>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-lesson-detail" title="查看课时定级、质检项与动作统计">课时详情</button>
+        </footer>
+        <div id="wb-lesson-grade-card" hidden aria-hidden="true"></div>
+        <div id="wb-qa-panel" hidden aria-hidden="true"></div>
+        <div id="wb-action-stats" hidden aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div id="review-panel" class="compare-view-panel" hidden>
+    <p class="compare-hint compare-hint-stage">③ 表格终审：汇总全部区块判定，保存并下载成果，确认后锁定本课。</p>
+    <div id="reuse-report-panel" class="reuse-report-panel" hidden>
+      <strong>复用报告</strong>
+      <span id="reuse-report-summary" class="reuse-report-summary"></span>
+      <span id="reuse-report-ratio" class="reuse-report-ratio"></span>
+    </div>
+    <div class="compare-split" id="compare-split">
+      <div class="review-table-wrap" id="review-table-wrap">
+        <table class="review-table" id="review-table">
+          <thead>
+            <tr>
+              <th class="col-cw">课件</th>
+              <th class="col-block">旧区块</th>
+              <th class="col-block">新区块</th>
+              <th class="col-teacher-sm">复用判定</th>
+              <th class="col-teacher-sm">变化类型</th>
+              <th class="col-teacher-note">教研说明</th>
+              <th class="col-act"></th>
+            </tr>
+          </thead>
+          <tbody id="review-table-body">
+            <tr><td colspan="7" class="empty-cell">加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="compare-split-handle" id="compare-split-handle" title="拖动调整表格与预览宽度" role="separator" aria-orientation="vertical" aria-label="调整左右宽度"></div>
+      <div class="review-preview-wrap" id="review-preview-wrap">
+        <div class="review-preview-hint" id="review-preview-hint">点击左侧一行，或「添加配对」里选区块，右侧显示框选与文字摘要</div>
+        <div class="review-preview" id="review-preview"></div>
+      </div>
+    </div>
+    </div>
+
+    <div id="pair-panel" class="compare-view-panel">
+      <div class="pair-layout pair-showcase-layout">
+        <div class="pair-col pair-blocks-col old-blocks-col">
+          <div class="pair-col-head old">旧侧区块 <span id="old-count">0</span></div>
+          <div class="pair-blocks-scroll" id="old-blocks-container"></div>
+        </div>
+        <div class="pair-col pair-preview-col pair-hub-col">
+          <div class="showcase-theater" id="showcase-theater">
+            <div class="showcase-pipeline showcase-pipeline-center showcase-pipeline-top" id="showcase-pipeline" aria-label="本课数据处理流程">
+              <div class="showcase-step" data-step="0">
+                <span class="showcase-step-icon">📚</span>
+                <span class="showcase-step-label">旧库拉取</span>
+                <span class="showcase-step-meta" id="showcase-old-meta">—</span>
+              </div>
+              <div class="showcase-step-arrow" aria-hidden="true"></div>
+              <div class="showcase-step" data-step="1">
+                <span class="showcase-step-icon">📘</span>
+                <span class="showcase-step-label">新库拉取</span>
+                <span class="showcase-step-meta" id="showcase-new-meta">—</span>
+              </div>
+              <div class="showcase-step-arrow" aria-hidden="true"></div>
+              <div class="showcase-step" data-step="2">
+                <span class="showcase-step-icon">🔬</span>
+                <span class="showcase-step-label">区块扫描</span>
+                <span class="showcase-step-meta" id="showcase-block-meta">—</span>
+              </div>
+              <div class="showcase-step-arrow" aria-hidden="true"></div>
+              <div class="showcase-step" data-step="3">
+                <span class="showcase-step-icon">🛰</span>
+                <span class="showcase-step-label">全库匹配</span>
+                <span class="showcase-step-meta" id="showcase-match-meta">—</span>
+              </div>
+            </div>
+            <div class="showcase-doubao-stage" id="showcase-doubao-stage" hidden aria-hidden="true">
+              <div class="db-particle-field" aria-hidden="true"></div>
+              <div class="db-orbit-rings" aria-hidden="true">
+                <div class="db-ring db-ring-outer"></div>
+                <div class="db-ring db-ring-mid"></div>
+                <div class="db-ring db-ring-inner"></div>
+              </div>
+              <div class="db-orbit-glow" aria-hidden="true"></div>
+              <div class="db-hud db-hud-old" id="db-hud-old">
+                <span class="db-hud-icon">📚</span>
+                <span class="db-hud-label">旧库拉取</span>
+                <span class="db-hud-meta"><span id="db-old-count">0</span> 个旧块</span>
+                <span class="db-hud-arrow db-hud-arrow-to-center" aria-hidden="true"></span>
+              </div>
+              <div class="db-hud db-hud-new" id="db-hud-new">
+                <span class="db-hud-icon">📘</span>
+                <span class="db-hud-label">新库拉取</span>
+                <span class="db-hud-meta"><span id="db-new-count">0</span> 个新块</span>
+                <span class="db-hud-arrow db-hud-arrow-to-center" aria-hidden="true"></span>
+              </div>
+              <div class="db-hud db-hud-pair" id="db-hud-pair">
+                <span class="db-hud-icon">🔗</span>
+                <span class="db-hud-label">配对拉取</span>
+                <span class="db-hud-meta"><span id="db-pair-count">0</span> / <span id="db-pair-total">0</span></span>
+              </div>
+              <div class="db-orbit-canvas" id="db-orbit-canvas">
+                <div class="hybrid-narrative-wrap" id="hybrid-narrative-wrap" hidden>
+                  <div class="hybrid-narrative" id="hybrid-narrative" aria-live="polite"></div>
+                </div>
+                <svg class="db-orbit-svg" id="db-orbit-svg" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="db-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#ef4444"/>
+                      <stop offset="50%" stop-color="#a855f7"/>
+                      <stop offset="100%" stop-color="#db2777"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="db-radar" id="db-radar" aria-hidden="true">
+                  <div class="db-radar-sweep"></div>
+                  <div class="db-radar-pulse"></div>
+                </div>
+                <div class="db-orbit-track-glow" aria-hidden="true"></div>
+                <div class="db-orbit-blocks" id="db-orbit-blocks"></div>
+              </div>
+              <p class="db-stage-caption" id="db-stage-caption">演示模式 · 模拟新旧库拉取与全域匹配</p>
+              <div class="db-stage-progress" id="db-stage-progress" aria-label="演示阶段">
+                <span class="db-progress-dot" data-phase="0"></span>
+                <span class="db-progress-dot" data-phase="1"></span>
+                <span class="db-progress-dot" data-phase="2"></span>
+                <span class="db-progress-dot" data-phase="3"></span>
+              </div>
+            </div>
+            <div class="showcase-sim-screen" id="showcase-sim-screen" aria-live="polite"></div>
+            <div class="showcase-pair-arena" id="showcase-pair-arena" hidden aria-hidden="true">
+              <div class="pa-grid-bg" aria-hidden="true"></div>
+              <div class="pa-scan-beam" id="pa-scan-beam" aria-hidden="true"></div>
+              <svg class="pa-link-svg" id="pa-link-svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="pa-beam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ef4444"/>
+                    <stop offset="45%" stop-color="#e879f9"/>
+                    <stop offset="100%" stop-color="#f472b6"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="pa-lane">
+                <div class="pa-bridge" id="pa-bridge" aria-hidden="true"></div>
+                <div class="pa-side pa-side-old">
+                  <span class="pa-side-tag">旧库</span>
+                  <div class="pa-orb-slot" id="pa-old-slot"></div>
+                </div>
+                <div class="pa-center">
+                  <p class="pa-status" id="pa-status">—</p>
+                </div>
+                <div class="pa-side pa-side-new">
+                  <span class="pa-side-tag">新库</span>
+                  <div class="pa-orb-slot" id="pa-new-slot"></div>
+                </div>
+              </div>
+              <div class="pa-matched-row" id="pa-matched-row" aria-label="已匹配"></div>
+            </div>
+            <div class="showcase-vortex" id="showcase-vortex" aria-hidden="true"></div>
+            <p class="showcase-tagline" id="showcase-tagline" hidden aria-hidden="true"></p>
+            <div class="showcase-theater-footer">
+              <button type="button" class="showcase-skip-btn" id="btn-showcase-skip">跳过动画</button>
+              <div class="showcase-complete-prompt" id="showcase-complete-prompt" hidden>
+                <p class="showcase-complete-prompt-text">配对展示完成。是否进入逐块审核填写复用判定？</p>
+                <div class="showcase-complete-prompt-actions">
+                  <button type="button" class="btn btn-sm btn-primary" id="btn-showcase-enter-workbench">进入逐块审核 →</button>
+                  <button type="button" class="btn btn-sm btn-outline" id="btn-showcase-stay-overview">继续浏览总览</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pair-hub-glow" id="pair-hub-glow" aria-hidden="true"></div>
+          <div class="pair-preview-layer" id="pair-preview-layer">
+            <div class="pair-preview-hint" id="pair-preview-hint">点击左右区块或中间连线查看教材与课件对照</div>
+            <div class="pair-preview-body" id="pair-preview">
+              <div class="pair-preview-empty">对照总览 · 选中配对查看教材页与课件</div>
+            </div>
+          </div>
+        </div>
+        <div class="pair-col pair-blocks-col new-blocks-col">
+          <div class="pair-col-head new">新侧模块 <span id="new-count">0</span></div>
+          <div class="pair-blocks-scroll" id="new-blocks-container"></div>
+        </div>
+      </div>
+      <div class="showcase-progress-wrap showcase-progress-hidden" id="showcase-progress-wrap" aria-hidden="true">
+        <div class="showcase-progress-track">
+          <div class="showcase-progress-fill" id="showcase-progress-fill"></div>
+        </div>
+        <span class="showcase-progress-label" id="showcase-progress-label">配对 0 / 0</span>
+      </div>
+    </div>
+  </main>
+
+  <svg id="match-svg" class="match-svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="match-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ef4444"/>
+        <stop offset="50%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="#db2777"/>
+      </linearGradient>
+      <linearGradient id="match-line-gradient-active" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f97316"/>
+        <stop offset="100%" stop-color="#db2777"/>
+      </linearGradient>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#db2777"/>
+      </marker>
+      <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/>
+      </marker>
+    </defs>
+  </svg>
+
+  <dialog id="lesson-detail-dialog" class="lesson-detail-dialog">
+    <div class="lesson-detail-inner">
+      <h3>课时洞察</h3>
+      <div id="lesson-detail-body" class="lesson-detail-body"></div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-outline" id="lesson-detail-close">关闭</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="add-match-dialog">
+    <form method="dialog" id="add-match-form">
+      <h3>添加区块配对</h3>
+      <label>旧区块
+        <select id="add-old-block"><option value="">— 可选 —</option></select>
+      </label>
+      <label>新区块
+        <select id="add-new-block"><option value="">— 可选 —</option></select>
+      </label>
+      <div class="dialog-actions">
+        <button type="submit" class="btn">创建</button>
+        <button type="button" class="btn btn-outline" id="add-match-cancel">取消</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="feedback-dialog">
+    <form method="dialog" id="feedback-form">
+      <h3 id="feedback-dialog-title">反馈</h3>
+      <label id="feedback-verdict-wrap">您的判断
+        <select id="feedback-verdict">
+          <option value="wrong">AI 判错了</option>
+          <option value="unsure">存疑</option>
+          <option value="correct">AI 判对了</option>
+        </select>
+      </label>
+      <label id="feedback-action-wrap" hidden>正确动作
+        <select id="feedback-correct-action"></select>
+      </label>
+      <label>补充说明
+        <textarea id="feedback-note" rows="3" placeholder="简述错因或建议…"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button type="submit" class="btn">提交</button>
+        <button type="button" class="btn btn-outline" id="feedback-cancel">取消</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" hidden></div>
+  <script>
+    window.COMPARE_LESSON_UID = {{ lesson_uid|tojson }};
+    window.COMPARE_API_PREFIX = '/api/new-library';
+  </script>
+  <script src="/static/new_library/compare.js?v={{ static_v }}"></script>
+  <script src="/static/new_library/compare_showcase_doubao.js?v={{ static_v }}"></script>
+  <script src="/static/new_library/compare_showcase_hybrid.js?v={{ static_v }}"></script>
+  <script src="/static/new_library/compare_showcase_v4.js?v={{ static_v }}"></script>
+</body>
+</html>

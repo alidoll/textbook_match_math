@@ -1,0 +1,270 @@
+/* 教材库馆藏架 — 原创暗色木架 */
+.lib-page {
+  --lib-ink: #f3e6c8;
+  --lib-muted: #cbb89a;
+  --lib-wood: #2a1a12;
+  --lib-brass: #c4a052;
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(180deg, #1a120c, #0e0a08);
+  color: var(--lib-ink);
+  font-family: "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+.lib-top {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 20px 8px;
+}
+
+.lib-back {
+  color: var(--lib-brass);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.lib-title {
+  margin: 8px 0 4px;
+  font-size: 28px;
+  letter-spacing: 0.08em;
+}
+
+.lib-lead {
+  margin: 0;
+  color: var(--lib-muted);
+  font-size: 13px;
+}
+
+.lib-subjects,
+.lib-editions {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lib-subjects button,
+.lib-editions button {
+  border: 1px solid #7a5c32;
+  background: #3a281c;
+  color: var(--lib-ink);
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.lib-subjects button.is-on,
+.lib-editions button.is-on {
+  background: linear-gradient(180deg, #e0c06a, #c4a052);
+  color: #1a100c;
+  border-color: #8a6b38;
+  font-weight: 700;
+}
+
+.lib-case {
+  max-width: 1100px;
+  margin: 12px auto 40px;
+  padding: 0 16px;
+  position: relative;
+}
+
+.lib-cornice {
+  height: 18px;
+  background: linear-gradient(180deg, #7a5238, #3a2418);
+  border-radius: 4px 4px 0 0;
+  box-shadow: inset 0 2px 0 rgba(255, 220, 160, 0.15);
+}
+
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
+  padding: 22px 16px 28px;
+  min-height: 280px;
+  background:
+    radial-gradient(ellipse 50% 60% at 50% 30%, rgba(255, 186, 92, 0.12), transparent 70%),
+    linear-gradient(180deg, #3d261c, #241610);
+  border-left: 2px solid #0a0604;
+  border-right: 2px solid #0a0604;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
+
+.lib-plank {
+  height: 20px;
+  background: linear-gradient(180deg, #8a5a3c, #3a2418 70%, #1e120c);
+  border-radius: 0 0 4px 4px;
+}
+
+.lib-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.lib-slot:hover {
+  transform: translateY(-6px);
+  border-color: var(--lib-brass);
+}
+
+.lib-spine {
+  width: 44px;
+  height: 150px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 4px 0 0 rgba(255, 255, 255, 0.1),
+    2px 4px 8px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(90deg, #4a1520, #7a3040 42%, #3a1018);
+}
+
+.lib-slot:nth-child(3n) .lib-spine {
+  background: linear-gradient(90deg, #152438, #2f5078 42%, #101c2c);
+}
+
+.lib-slot:nth-child(4n) .lib-spine {
+  background: linear-gradient(90deg, #1e3022, #3d5c42 42%, #152018);
+}
+
+.lib-spine-name {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  max-height: 130px;
+  overflow: hidden;
+}
+
+.lib-slot-label {
+  font-size: 12px;
+  text-align: center;
+  color: var(--lib-muted);
+}
+
+.lib-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: #3a281c;
+  border: 1px solid #7a5c32;
+}
+
+.lib-slot.is-empty .lib-badge { color: #cbb89a; }
+.lib-slot.is-building .lib-badge {
+  background: #5c4218;
+  color: #f3e6c8;
+}
+.lib-slot.is-ready .lib-badge {
+  background: #2d4a2e;
+  color: #c8e6c9;
+}
+
+.lib-slot-actions {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4px 20px 8px;
+}
+
+.lib-pill-btn {
+  border: 1px solid #c4a052;
+  background: linear-gradient(180deg, #e0c06a, #c4a052);
+  color: #1a100c;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  margin-right: 8px;
+}
+
+.lib-pill-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lib-pill-btn--ghost {
+  background: transparent;
+  color: #e8d4a8;
+  border-color: #7a5c32;
+}
+
+.lib-pill-btn--danger {
+  background: linear-gradient(180deg, #c45a4a, #8a3028);
+  border-color: #5a2018;
+  color: #fff6ee;
+}
+
+.lib-slot-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.lib-slot.is-selected {
+  border-color: var(--lib-brass);
+  box-shadow: 0 0 0 1px var(--lib-brass);
+}
+
+.lib-check {
+  position: absolute;
+  top: -2px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #c4a052;
+  background: #1a100c;
+  color: transparent;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+.lib-slot.is-selected .lib-check {
+  background: #e0c06a;
+  border-color: #f0d878;
+  color: #1a100c;
+  box-shadow: 0 0 0 1px #8a6a28;
+}
+
+.lib-slot.is-selected .lib-check::after {
+  content: "✓";
+}
+
+.lib-manage-mode .lib-slot {
+  cursor: pointer;
+}
+
+.lib-manage-mode .lib-slot:hover {
+  border-color: var(--lib-brass);
+}
+
+.lib-rename {
+  margin-top: 4px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid #7a5c32;
+  background: #3a281c;
+  color: #f3e6c8;
+  border-radius: 3px;
+  cursor: pointer;
+}

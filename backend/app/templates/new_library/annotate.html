@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新侧建块 · {{ page_title }}</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/annotate.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/annotate.css?v={{ static_v }}">
+</head>
+<body class="annotate-layout annotate-layout-new" data-ui-build="{{ static_v }}">
+  <header class="annotate-hero annotate-hero-new">
+    <div class="annotate-hero-inner">
+      <div class="annotate-hero-topbar">
+        <button type="button" class="annotate-back" id="annotate-close-btn" title="关闭本页，回到整册建设">← 返回</button>
+        <a id="link-compare" class="annotate-hero-compare" href="#" hidden>③ 新旧对比 →</a>
+      </div>
+      <div class="annotate-hero-titlebar">
+        <h1 id="page-title">{{ page_title }}</h1>
+        <div class="annotate-meta annotate-meta-inline" id="page-sub">加载中…</div>
+      </div>
+      <nav class="progress-steps-shell" id="annotate-pipeline-toolbar" aria-label="课时流程">
+        <div class="progress-steps-bar">
+          <div class="progress-steps-pipelines">
+            <div class="progress-pipeline-lane progress-pipeline-lane--analysis is-collapsed" id="analysis-pipeline-lane">
+              <button type="button" class="progress-pipeline-lane-toggle" id="analysis-pipeline-collapse" aria-expanded="false" title="展开对照六步">
+                <span class="progress-pipeline-lane-toggle-text">对照</span>
+                <span class="progress-pipeline-lane-toggle-meta" id="analysis-pipeline-summary">0/6</span>
+                <span class="progress-pipeline-lane-toggle-icon" aria-hidden="true"></span>
+              </button>
+              <div class="progress-steps progress-steps--analysis" id="analysis-progress-steps" role="list" aria-label="对照预处理" hidden></div>
+            </div>
+            <div class="progress-pipeline-lane progress-pipeline-lane--build is-collapsed" id="block-pipeline-lane" hidden>
+              <button type="button" class="progress-pipeline-lane-toggle" id="block-pipeline-collapse" aria-expanded="false" title="展开建块七步">
+                <span class="progress-pipeline-lane-toggle-text">建块</span>
+                <span class="progress-pipeline-lane-toggle-meta" id="block-pipeline-summary">0/7</span>
+                <span class="progress-pipeline-lane-toggle-icon" aria-hidden="true"></span>
+              </button>
+              <div class="progress-steps progress-steps--build" id="block-progress-steps" role="list" aria-label="建块锚定" hidden></div>
+            </div>
+          </div>
+          <div class="progress-steps-actions">
+            <span class="progress-steps-status" id="pipeline-status-line"></span>
+            <span class="pair-review-verdict" id="pair-review-verdict" hidden></span>
+            <span class="pair-review-status-badge" id="pair-review-status-badge"></span>
+            <span class="build-step-group annotate-pair-review-inline" id="step-group-confirm" data-step="pair_review" hidden>
+              <button type="button" class="progress-steps-btn progress-steps-btn--mini pair-review-btn" data-pair-status="confirmed" title="主题一致，可用课内对照建块">确认对照</button>
+              <button type="button" class="progress-steps-btn progress-steps-btn--mini pair-review-btn" data-pair-status="heavy_change" title="仍是同一课但改动大，需手动建块">同课改动大</button>
+              <button type="button" class="progress-steps-btn progress-steps-btn--mini pair-review-btn" data-pair-status="no_old" title="粗分配错或无对应旧课">无对应</button>
+            </span>
+            <button type="button" class="progress-steps-btn progress-steps-btn--outline" id="run-analysis-btn" title="整课 OCR → 整理原子 → 栏目·块名 → 对照预判">运行对照分析</button>
+            <button type="button" class="progress-steps-btn progress-steps-btn--outline" id="run-build-anchor-btn" title="整课建块 → 补全锚定">运行建块与锚定</button>
+            <button type="button" class="progress-steps-btn progress-steps-btn--outline progress-steps-btn--mini blocks-save-btn" id="lock-blocks-btn" title="锁定本课区块">保存锁定</button>
+            <button type="button" class="progress-steps-btn progress-steps-btn--outline progress-steps-btn--mini" id="unlock-blocks-btn" hidden title="解锁">解锁</button>
+          </div>
+        </div>
+        <div class="build-step-toolbar build-step-toolbar--primary" id="build-step-toolbar-primary" aria-label="常用步骤">
+          <span class="build-step-group" id="step-group-text-ocr" data-step="text_ocr">
+            <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="ocr-text-btn">文字 OCR</button>
+          </span>
+          <span class="build-step-group" id="step-group-image-ocr" data-step="image_ocr">
+            <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="ocr-image-btn">图片 OCR</button>
+          </span>
+          <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="seed-from-old-lesson-btn" title="对照旧块在本课全部教材页自动建块">AI 建整课</button>
+          <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="anchor-page-btn">本页锚定</button>
+          <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="bulk-suggest-anchor-btn">补全锚定</button>
+          <button type="button" class="progress-steps-btn progress-steps-btn--mini progress-steps-btn--danger" id="delete-all-blocks-btn" hidden title="清空本课全部区块，便于先核对 OCR/整理">一键清空区块</button>
+        </div>
+        <details class="annotate-advanced-steps">
+          <summary>高级</summary>
+          <div class="build-step-toolbar build-step-toolbar--advanced" id="build-step-toolbar">
+            <span class="hint build-step-status" id="build-step-status"></span>
+            <span class="hint page-action-hint" id="page-action-hint" hidden></span>
+            <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="ai-curate-lesson-btn">整理原子</button>
+            <button type="button" class="progress-steps-btn progress-steps-btn--mini" id="prescan-suggest-btn">栏目·预判</button>
+          </div>
+          <div class="annotate-primary-swap" id="pair-review-swap" hidden>
+            <label for="primary-old-select">换主参照旧课（仅多候选时）</label>
+            <select id="primary-old-select" class="primary-old-select"></select>
+            <button type="button" class="btn secondary btn-sm" id="primary-old-swap-btn">应用</button>
+          </div>
+        </details>
+      </nav>
+      <span id="content-prescan-status" hidden aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <div class="annotate-grid annotate-grid-new">
+    <aside class="card annotate-col old-ref-col" id="old-ref-col" hidden>
+      <div class="col-head col-head--toolbar">
+        <h2 id="old-ref-title">旧教材参照</h2>
+      </div>
+      <details class="annotate-tips old-ref-tips">
+        <summary>对照说明</summary>
+        <p class="col-hint" id="old-ref-hint"></p>
+      </details>
+      <div class="old-ref-toolbar">
+        <span class="badge old-sync-badge" id="old-sync-badge" role="button" tabindex="0" title="旧教材页随新教材页切换；点击切换模式">页码同步</span>
+        <button type="button" class="btn secondary btn-sm" id="old-sync-toggle-btn">切换独立浏览</button>
+      </div>
+      <div class="old-tb-body">
+        <div class="tb-viewport-shell old-tb-viewport-shell" id="old-tb-viewport-shell" hidden>
+          <button type="button" class="preview-nav-arrow preview-nav-prev" id="old-tb-prev-btn" aria-label="旧教材上一页">
+            <span class="preview-nav-arr">◀</span>
+          </button>
+          <div class="tb-viewport old-tb-viewport" id="old-tb-viewport">
+            <img id="old-tb-image" alt="旧教材页" hidden>
+            <div id="old-module-layer" class="module-highlight-layer"></div>
+          </div>
+          <button type="button" class="preview-nav-arrow preview-nav-next" id="old-tb-next-btn" aria-label="旧教材下一页">
+            <span class="preview-nav-arr">▶</span>
+          </button>
+        </div>
+        <p class="hint old-tb-empty" id="old-tb-empty" hidden>粗分旧课尚无教材页图，请先在旧库接入页生成页图。</p>
+        <div class="textbook-page-nav old-tb-page-nav" id="old-tb-page-nav" hidden>
+          <span class="tb-page-info" id="old-tb-page-info"></span>
+        </div>
+        <div class="old-prescan-bridge" id="old-prescan-bridge" hidden>
+          <div class="old-prescan-bridge-title">本页建议对照旧块</div>
+          <div class="old-prescan-bridge-chips" id="old-prescan-bridge-chips"></div>
+        </div>
+      </div>
+      <div class="old-blocks-ref-toolbar">
+        <button type="button" class="btn secondary btn-sm" id="btn-suggest-anchor" title="按原子正文在全版旧库中检索，优先同单元，可跨课">跨课找旧块</button>
+        <button type="button" class="btn btn-sm" id="old-annotate-link" title="打开旧侧区块建设页面">打开旧侧建块</button>
+      </div>
+    </aside>
+
+    <section class="card annotate-col annotate-mid" id="textbook-col">
+      <div class="col-head col-head--toolbar">
+        <h2>新教材页 + 原子</h2>
+      </div>
+      <div class="atom-actions atom-toolbar" id="atom-actions">
+        <span id="atom-selection-label" class="atom-selection-summary hint">未选中原子</span>
+        <div class="atom-actions-btns">
+          <button type="button" class="btn secondary" id="undo-atoms-btn" disabled>撤销上一步</button>
+          <button type="button" class="btn secondary" id="merge-atoms-btn" disabled>合并选中</button>
+          <button type="button" class="btn secondary" id="unmerge-ocr-btn" disabled title="将误合并的原子拆回 OCR 碎块；可双击原子框">拆回 OCR</button>
+          <button type="button" class="btn secondary" id="delete-atoms-btn" disabled>删除选中</button>
+          <button type="button" class="btn secondary btn-sm" id="save-atoms-btn" title="手动改原子后保存本页">保存本页</button>
+          <button type="button" class="btn-link" id="clear-atoms-btn" hidden>取消选择</button>
+          <label class="atom-tag-toggle" title="隐藏方框上的编号标签，便于看清边界">
+            <input type="checkbox" id="hide-atom-tags-checkbox"> 隐藏标签
+          </label>
+        </div>
+      </div>
+      <div class="tb-body">
+        <div class="tb-viewport-shell">
+          <button type="button" class="preview-nav-arrow preview-nav-prev" id="tb-prev-btn" aria-label="上一页">
+            <span class="preview-nav-arr">◀</span><span class="preview-nav-lbl">上一页</span>
+          </button>
+          <div class="tb-viewport" id="tb-viewport">
+            <img id="tb-image" alt="教材页" hidden>
+            <div id="atom-layer"></div>
+          </div>
+          <button type="button" class="preview-nav-arrow preview-nav-next" id="tb-next-btn" aria-label="下一页">
+            <span class="preview-nav-arr">▶</span><span class="preview-nav-lbl">下一页</span>
+          </button>
+        </div>
+        <div class="textbook-page-nav" id="textbook-page-nav">
+          <span class="tb-page-info" id="tb-page-info"></span>
+          <p class="page-action-hint" id="page-action-hint" hidden></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card annotate-col" id="blocks-col">
+      <div id="analysis-right-panel" class="analysis-right-panel" hidden>
+        <section class="analysis-panel-block analysis-verdict-bar" id="analysis-verdict-bar"></section>
+        <section class="analysis-panel-block analysis-match-block">
+          <details class="analysis-match-details" id="analysis-match-details" open>
+            <summary>匹配参照课</summary>
+            <div id="analysis-prescan-content" class="analysis-prescan-body content-prescan-result"></div>
+          </details>
+        </section>
+        <section class="analysis-panel-block analysis-atom-overview" id="analysis-atom-overview"></section>
+        <section class="analysis-panel-block analysis-atom-catalog">
+          <div class="analysis-atom-catalog-head">
+            <span class="analysis-atom-catalog-title">本页原子</span>
+            <input type="search" id="atom-catalog-search" class="atom-catalog-search" placeholder="搜索…" autocomplete="off">
+            <select id="atom-catalog-filter" class="atom-catalog-filter" title="按类型筛选">
+              <option value="">全部</option>
+              <option value="text">文本</option>
+              <option value="title">标题</option>
+              <option value="image">图像</option>
+            </select>
+          </div>
+          <ul class="atom-catalog-list" id="atom-catalog-list"></ul>
+        </section>
+      </div>
+      <div id="blocks-work-panel">
+      <div id="blocking-summary-card" class="blocking-summary-card" hidden></div>
+      <details class="annotate-dual-track" id="dual-track-panel">
+        <summary>④ 双轨建块实验（预览，不写库）</summary>
+        <p class="hint dual-track-intro">
+          侧栏空间有限，建议在<strong>独立工作台</strong>中逐步查看教材轨 / 课件轨 / 对比 / 融合（三栏可各自滚动）。
+        </p>
+        <a class="btn btn-sm" id="link-dual-track-workbench"
+          href="/new-library/lessons/{{ lesson_uid }}/dual-track"
+          target="_blank" rel="noopener">
+          打开双轨实验工作台 →
+        </a>
+      </details>
+      <div class="col-head">
+        <h2>新教学区块 <span class="blocks-count-badge" id="blocks-count"></span><span class="blocks-locked-badge" id="blocks-locked-badge" hidden>已锁定</span></h2>
+      </div>
+      <div class="block-form" id="block-form-wrap">
+        <select id="block-stage-ref" class="block-stage-ref" title="新教材模块（如封面标题、问题情境）">
+          <option value="">— 选择模块 —</option>
+        </select>
+        <input type="text" id="block-stage-custom" class="block-stage-custom" placeholder="自设模块" hidden>
+        <input type="text" id="block-name" placeholder="区块名称，总结本块内容，如：科学探究-捏陶泥">
+        <button type="button" class="btn" id="create-block-btn">创建区块</button>
+        <button type="button" class="btn-link" id="cancel-block-edit-btn" hidden>取消编辑</button>
+      </div>
+      <p class="block-form-status hint" id="block-form-hint"></p>
+      <details class="annotate-tips">
+        <summary>操作说明</summary>
+        <ol class="annotate-quickstart">
+          <li><strong>对照分析</strong>：点顶部「运行对照分析」（OCR→整理原子→栏目·块名→对照预判；结论明确时自动确认，否则点 确认/改动大/无对应）</li>
+          <li><strong>建块与锚定</strong>：点「AI 建整课」或「运行建块与锚定」，完成后点「补全锚定」</li>
+        </ol>
+      </details>
+      <div class="old-block-picker-wrap" id="old-block-picker-wrap" hidden>
+        <label for="old-block-picker">锚定旧区块：</label>
+        <select id="old-block-picker" class="old-block-picker"></select>
+      </div>
+      <p class="old-block-pick" id="old-block-pick-label" hidden></p>
+      <div class="blocks-col-scroll">
+        <ul id="blocks-list" class="blocks-list"></ul>
+      </div>
+      <div class="blocks-page-nav" id="blocks-page-nav">
+        <span class="blocks-nav-hint" id="blocks-nav-hint"></span>
+      </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" hidden></div>
+  <script>
+    window.ANNOTATE_LESSON_UID = {{ lesson_uid|tojson }};
+    window.ANNOTATE_API_PREFIX = '/api/new-library';
+  </script>
+  <script src="/static/new_library/annotate.js?v={{ static_v }}"></script>
+</body>
+</html>

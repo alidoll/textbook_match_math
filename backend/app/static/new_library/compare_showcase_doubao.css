@@ -1,0 +1,463 @@
+/* 豆包方案：椭圆轨道粒子演示（?showcase=doubao 默认，?showcase=classic 为上一版） */
+#pair-panel.showcase-mode-doubao.showcase-playing {
+  pointer-events: none;
+}
+#pair-panel.showcase-mode-doubao.showcase-playing .db-stage-controls,
+#pair-panel.showcase-mode-doubao.showcase-playing .showcase-bottom-controls {
+  pointer-events: auto;
+}
+#pair-panel.showcase-mode-doubao.showcase-playing .pair-blocks-col {
+  opacity: 0.06;
+  filter: blur(1px);
+  transition: opacity 0.6s;
+}
+#pair-panel.showcase-mode-doubao #showcase-sim-screen,
+#pair-panel.showcase-mode-doubao #showcase-pipeline,
+#pair-panel.showcase-mode-doubao #showcase-tagline {
+  display: none !important;
+}
+#pair-panel.showcase-mode-doubao #showcase-doubao-stage {
+  display: flex !important;
+}
+.showcase-doubao-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
+  background: #030712;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% 45%, rgba(88, 28, 135, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 60%);
+}
+.showcase-doubao-stage[hidden] {
+  display: none !important;
+}
+
+/* 粒子流 */
+.db-particle-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(148, 163, 184, 0.35) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.25;
+  animation: db-particle-drift 18s linear infinite;
+}
+@keyframes db-particle-drift {
+  from { background-position: 0 0; }
+  to { background-position: 480px 0; }
+}
+
+/* 轨道圆环 */
+.db-orbit-rings {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(92%, 520px);
+  height: min(68%, 340px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.db-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed;
+  opacity: 0.45;
+}
+.db-ring-outer {
+  border-color: rgba(168, 85, 247, 0.45);
+  animation: db-ring-spin 22s linear infinite reverse;
+}
+.db-ring-mid {
+  inset: 12%;
+  border-color: rgba(244, 114, 182, 0.4);
+  animation: db-ring-spin 16s linear infinite;
+}
+.db-ring-inner {
+  inset: 24%;
+  border-color: rgba(239, 68, 68, 0.3);
+  border-style: solid;
+  animation: db-ring-spin 11s linear infinite reverse;
+}
+@keyframes db-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+.db-orbit-glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(78%, 440px);
+  height: min(58%, 300px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(244, 114, 182, 0.12) 0%, transparent 70%);
+  animation: db-glow-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes db-glow-pulse {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(0.96); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+/* HUD 流程卡片（弱化） */
+.db-hud {
+  position: absolute;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0.38;
+  transform: scale(0.88);
+  transition: opacity 0.45s, transform 0.45s, box-shadow 0.45s, border-color 0.45s;
+  min-width: 96px;
+}
+.db-hud.is-active {
+  opacity: 1;
+  transform: scale(1);
+  border-color: rgba(244, 114, 182, 0.55);
+  box-shadow: 0 0 24px rgba(244, 114, 182, 0.25);
+}
+.db-hud.is-done {
+  opacity: 0.72;
+  transform: scale(0.94);
+  border-color: rgba(74, 222, 128, 0.45);
+}
+.db-hud-old { left: 4%; top: 18%; }
+.db-hud-new { right: 4%; top: 18%; }
+.db-hud-pair { right: 6%; top: 6%; min-width: 108px; }
+.db-hud-icon { font-size: 22px; line-height: 1; }
+.db-hud-label { font-size: 12px; font-weight: 700; color: #e2e8f0; }
+.db-hud-meta { font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+.db-hud-arrow {
+  position: absolute;
+  width: 36px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0.9));
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.db-hud-old .db-hud-arrow { right: -42px; top: 50%; transform: translateY(-50%); }
+.db-hud-new .db-hud-arrow { left: -42px; top: 50%; transform: translateY(-50%) scaleX(-1); }
+.db-hud.is-active .db-hud-arrow.is-flowing {
+  opacity: 1;
+  animation: db-arrow-pulse 1.2s ease-in-out infinite;
+}
+@keyframes db-arrow-pulse {
+  0%, 100% { filter: brightness(1); box-shadow: none; }
+  50% { filter: brightness(1.4); box-shadow: 0 0 12px rgba(74, 222, 128, 0.8); }
+}
+
+/* 椭圆画布 */
+.db-orbit-canvas {
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+  max-height: 72%;
+  margin: 0 auto;
+  width: min(96%, 560px);
+  align-self: center;
+}
+.db-orbit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.db-orbit-svg line.db-scan-line {
+  stroke: rgba(244, 114, 182, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+  opacity: 0;
+  animation: db-scan-flash 0.8s ease-out forwards;
+}
+.db-orbit-svg line.db-match-line {
+  stroke: url(#db-line-gradient);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.6));
+  animation: db-match-line-in 0.55s ease-out forwards;
+}
+.db-orbit-svg line.db-match-line.is-flow {
+  stroke-dasharray: 8 12;
+  animation: db-match-line-in 0.55s ease-out forwards, db-line-flow 1.2s linear infinite;
+}
+@keyframes db-scan-flash {
+  0% { opacity: 0; }
+  30% { opacity: 0.85; }
+  100% { opacity: 0.15; }
+}
+@keyframes db-match-line-in {
+  from { opacity: 0; stroke-width: 1; }
+  to { opacity: 1; stroke-width: 2.5; }
+}
+@keyframes db-line-flow {
+  to { stroke-dashoffset: -40; }
+}
+
+.db-orbit-track-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 84%;
+  height: 72%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(239, 68, 68, 0.55);
+  border-right-color: rgba(239, 68, 68, 0.15);
+  animation: db-track-flow 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes db-track-flow {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.db-orbit-blocks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+.db-orbit-blocks.is-spinning {
+  animation: db-blocks-spin 42s linear infinite;
+}
+.db-orbit-blocks.is-spinning .db-orb.is-orbit {
+  animation: db-orb-counter 42s linear infinite, db-orb-glow 3s ease-in-out infinite;
+}
+@keyframes db-blocks-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes db-orb-counter {
+  to { transform: rotate(-360deg) scale(1); }
+}
+@keyframes db-orb-glow {
+  50% { filter: brightness(1.12); }
+}
+.db-orb {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  font-family: ui-monospace, monospace;
+  color: #fff;
+  z-index: 4;
+  opacity: 0;
+  transform: scale(0.3);
+  transition: box-shadow 0.35s, transform 0.35s;
+}
+.db-orb-old {
+  background: radial-gradient(circle at 30% 30%, #fecaca, #ef4444 55%, #991b1b);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.55), -6px 0 12px rgba(239, 68, 68, 0.25);
+}
+.db-orb-new {
+  background: radial-gradient(circle at 30% 30%, #fbcfe8, #ec4899 55%, #831843);
+  box-shadow: 0 0 14px rgba(236, 72, 153, 0.55), 6px 0 12px rgba(236, 72, 153, 0.25);
+}
+.db-orb.is-entered {
+  opacity: 1;
+  transform: scale(1);
+  animation: db-orb-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.db-orb.is-pause {
+  animation: db-orb-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both, db-orb-breathe 0.4s ease-out 0.45s 1;
+}
+.db-orb.is-orbit {
+  /* 公转由父容器 is-spinning 承担，此处仅标记状态 */
+}
+.db-orb.is-lit {
+  transform: scale(1.22);
+  z-index: 6;
+  box-shadow: 0 0 22px rgba(250, 250, 250, 0.5);
+}
+.db-orb.is-matched::after {
+  content: '✓';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4ade80;
+  color: #052e16;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  animation: db-check-pop 0.35s ease-out;
+}
+@keyframes db-orb-pop {
+  0% { opacity: 0; transform: scale(0.2); }
+  70% { transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes db-orb-breathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.35); }
+}
+@keyframes db-orb-orbit {
+  from { transform: rotate(var(--orbit-start, 0deg)) translateX(var(--orbit-rx, 200px)) rotate(calc(-1 * var(--orbit-start, 0deg))) scale(1); }
+  to { transform: rotate(calc(var(--orbit-start, 0deg) + 360deg)) translateX(var(--orbit-rx, 200px)) rotate(calc(-1 * (var(--orbit-start, 0deg) + 360deg))) scale(1); }
+}
+@keyframes db-check-pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* 雷达 */
+.db-radar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.db-radar.is-active { opacity: 1; }
+.db-radar.is-frozen .db-radar-sweep { animation-play-state: paused; opacity: 0.35; }
+.db-radar-sweep {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 2px solid rgba(244, 114, 182, 0.25);
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(244, 114, 182, 0.45) 50deg, transparent 100deg);
+  animation: db-radar-spin 2.2s linear infinite;
+}
+.db-radar-pulse {
+  position: absolute;
+  inset: 20%;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 114, 182, 0.35);
+  animation: db-radar-pulse 2s ease-out infinite;
+}
+@keyframes db-radar-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes db-radar-pulse {
+  0% { transform: scale(0.85); opacity: 0.8; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+
+/* 底部文案与进度 */
+.db-stage-caption {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 8px 16px 4px;
+  text-align: center;
+  font-size: 13px;
+  color: #94a3b8;
+  animation: db-caption-fade 0.5s ease-out;
+}
+@keyframes db-caption-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.db-stage-progress {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 0 10px;
+}
+.db-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.35);
+  transition: background 0.35s, transform 0.35s, box-shadow 0.35s;
+}
+.db-progress-dot.is-active {
+  background: #f472b6;
+  transform: scale(1.25);
+  box-shadow: 0 0 10px rgba(244, 114, 182, 0.7);
+}
+.db-progress-dot.is-done {
+  background: #4ade80;
+}
+
+.db-stage-controls {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+.showcase-theater-controls {
+  display: none !important;
+}
+.db-ctrl-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.85);
+  color: #cbd5e1;
+  cursor: pointer;
+}
+.db-ctrl-btn:hover {
+  border-color: #f472b6;
+  color: #f8fafc;
+}
+.db-ctrl-skip {
+  color: #94a3b8;
+}
+
+/* 收尾礼花 */
+.showcase-doubao-stage.is-finale .db-orbit-glow {
+  animation: db-finale-glow 1.2s ease-out forwards;
+}
+.showcase-doubao-stage.is-finale .db-particle-field {
+  animation: db-particle-drift 6s linear infinite, db-finale-sparkle 1.5s ease-out;
+}
+@keyframes db-finale-glow {
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1.15); filter: brightness(1.4); }
+}
+@keyframes db-finale-sparkle {
+  0% { opacity: 0.25; }
+  50% { opacity: 0.55; }
+  100% { opacity: 0.25; }
+}
+.showcase-doubao-stage.is-flash .db-orbit-blocks .db-orb {
+  animation: db-flash-pulse 0.45s ease-out;
+}
+@keyframes db-flash-pulse {
+  50% { filter: brightness(1.6); transform: scale(1.15); }
+}
+
+#pair-panel.showcase-mode-doubao.is-speed-fast .showcase-doubao-stage {
+  --db-speed: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-particle-field,
+  .db-ring,
+  .db-orbit-glow,
+  .db-radar-sweep,
+  .db-orbit-track-glow,
+  .db-orb.is-orbit {
+    animation: none !important;
+  }
+}

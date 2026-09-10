@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if is_test_diff_distribution %}新旧教材对比{% elif is_pipeline_shell %}教研生产链路{% else %}教材匹配系统{% endif %}</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/home.css?v={{ static_v }}">
+</head>
+<body class="home-page{% if is_test_diff_distribution %} home-page-test-diff{% elif is_pipeline_shell %} home-page-pipeline{% endif %}">
+  <header class="home-hero">
+    <div class="home-hero-inner">
+      {% if is_test_diff_distribution %}
+      <h1>新旧教材对比</h1>
+      <p class="home-lead">新旧教材逐课对照，差异标注与变更追踪</p>
+      {% elif is_pipeline_shell %}
+      <h1>教研生产链路</h1>
+      <p class="home-lead">教材比对 → 课件制作 → 选题制作；现网小科能力保留在「小科完整工作台」</p>
+      {% else %}
+      <h1>教材匹配系统</h1>
+      <p class="home-lead">旧教材库建设 → 新教材录入 → 区块对比定稿，一站式教研工作流</p>
+      {% endif %}
+      <div id="dbStatus" class="home-status">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="dbStatusText">正在检测数据库…</span>
+      </div>
+      <button id="apiKeyEdit" class="home-apikey-btn" hidden>修改 API Key</button>
+    </div>
+  </header>
+
+  <nav class="home-actions{% if is_test_diff_distribution %} home-actions-single{% elif is_pipeline_shell %} home-actions-pipeline{% endif %}" aria-label="主要功能">
+    {% if is_test_diff_distribution %}
+    <a class="home-action-card home-action-diff" href="/textbook-diff/workbook?subject=test">
+      <span class="home-action-step">STEP 04</span>
+      <h2>新旧教材对比</h2>
+      <p class="home-action-desc">新旧教材逐课对照，差异标注与变更追踪</p>
+      <span class="home-action-cta">进入教材对比 →</span>
+    </a>
+
+    {% elif is_pipeline_shell %}
+    <a class="home-action-card home-action-diff" href="/textbook-diff/">
+      <span class="home-action-step">①</span>
+      <h2>教材比对</h2>
+      <p class="home-action-desc">旧教材 + 新教材 → 逐页 / 字 / 图变动报告（轻量入口）</p>
+      <span class="home-action-cta">进入教材比对 →</span>
+    </a>
+    <a class="home-action-card home-action-courseware" href="/courseware/">
+      <span class="home-action-step">②</span>
+      <h2>课件制作</h2>
+      <p class="home-action-desc">新课件上传与 OCR，产出 KP 供选题调用（薄仓，非编辑器）</p>
+      <span class="home-action-cta">进入课件制作 →</span>
+    </a>
+    <a class="home-action-card home-action-selection" href="/selection/">
+      <span class="home-action-step">③</span>
+      <h2>选题制作</h2>
+      <p class="home-action-desc">新课入口 → 齐套（比对/旧题/新课件KP/题量）→ 交选题虾 → 审题</p>
+      <span class="home-action-cta">进入选题制作 →</span>
+    </a>
+    <a class="home-action-card home-action-xiaoke" href="/xiaoke-workbench/">
+      <span class="home-action-step">④</span>
+      <h2>小科完整工作台</h2>
+      <p class="home-action-desc">现网能力打包：旧库建设、新库建设、新旧对比结果，随时可对照与恢复</p>
+      <span class="home-action-cta">进入小科工作台 →</span>
+    </a>
+    <a class="home-action-card home-action-library" href="/textbook-library/">
+      <span class="home-action-step">⑤</span>
+      <h2>教材库</h2>
+      <p class="home-action-desc">化学 / 数学 / 科学教材入馆：上传 → 目录 → OCR → 原子与图片归档（统一入馆口）</p>
+      <span class="home-action-cta">进入教材库 →</span>
+    </a>
+
+    {% else %}
+    <a class="home-action-card home-action-old" href="/old-library/">
+      <span class="home-action-step">STEP 01</span>
+      <h2>旧库建设</h2>
+      <p class="home-action-desc">上传整册 PDF、课次拆分、旧课件入库与教学区块标注</p>
+      <span class="home-action-cta">进入旧库建设 →</span>
+    </a>
+    <a class="home-action-card home-action-new" href="/new-library/">
+      <span class="home-action-step">STEP 02</span>
+      <h2>新库建设</h2>
+      <p class="home-action-desc">上传整册 PDF、解析划分课时、粗分对照旧库并建块</p>
+      <span class="home-action-cta">进入新库建设 →</span>
+    </a>
+    <a class="home-action-card home-action-compare" href="/new-library/compare-results">
+      <span class="home-action-step">STEP 03</span>
+      <h2>新旧对比结果</h2>
+      <p class="home-action-desc">按课终审区块复用判定，批量导出对比与改稿清单</p>
+      <span class="home-action-cta">查看对比结果 →</span>
+    </a>
+    <a class="home-action-card home-action-diff" href="/textbook-diff/">
+      <span class="home-action-step">STEP 04</span>
+      <h2>新旧教材对比</h2>
+      <p class="home-action-desc">新旧教材逐课对照，差异标注与变更追踪</p>
+      <span class="home-action-cta">进入教材对比 →</span>
+    </a>
+    {% endif %}
+  </nav>
+
+  <footer class="home-footer">{% if is_test_diff_distribution %}textbook-diff{% elif is_pipeline_shell %}pipeline · PRODUCT_SHELL=pipeline{% else %}textbook-match{% endif %}</footer>
+
+  <!-- API Key 未配置时弹出输入框，填完才能使用 -->
+  <div id="apiKeyGate" class="api-key-overlay" hidden>
+    <div class="api-key-card">
+      <div id="apiKeySuccess" class="api-key-success" hidden>
+        <span class="api-key-success-icon">✓</span>
+        <span>API Key 验证成功！页面即将刷新…</span>
+      </div>
+      <div id="apiKeyFormWrap">
+        <h2>请填写你的 API Key</h2>
+        <p class="api-key-lead">系统需要 AI 服务密钥才能运行 OCR、目录识别、区块对比等功能。请输入你自己的 API Key，保存后即可使用。</p>
+        <form id="apiKeyForm" class="api-key-form">
+          <label class="api-key-field">
+            <span>App ID <small>(api-key 鉴权方式填写；Bearer 方式可留空)</small></span>
+            <input type="text" id="apiKeyAppId" placeholder="如 300007129" autocomplete="off">
+          </label>
+          <label class="api-key-field">
+            <span>API Key <em>*</em></span>
+            <input type="password" id="apiKeySecret" placeholder="输入你的 API Key" required autocomplete="off">
+          </label>
+          <div id="apiKeyError" class="api-key-error" hidden></div>
+          <button type="submit" class="api-key-submit">保存并使用</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- API Key 门控 ----
+    (function () {
+      var gate = document.getElementById('apiKeyGate');
+      var editBtn = document.getElementById('apiKeyEdit');
+      var form = document.getElementById('apiKeyForm');
+      var errBox = document.getElementById('apiKeyError');
+      var appInput = document.getElementById('apiKeyAppId');
+      var keyInput = document.getElementById('apiKeySecret');
+      var submitBtn = form.querySelector('.api-key-submit');
+
+      function showGate() {
+        gate.hidden = false;
+        editBtn.hidden = true;
+      }
+      function showButton() {
+        gate.hidden = true;
+        editBtn.hidden = false;
+      }
+      function showSuccess(msg) {
+        var formWrap = document.getElementById('apiKeyFormWrap');
+        var successBox = document.getElementById('apiKeySuccess');
+        var successText = successBox.querySelector('span:last-child');
+        formWrap.hidden = true;
+        successBox.hidden = false;
+        successText.textContent = msg || 'API Key 验证成功！页面即将刷新…';
+      }
+
+      function checkKey() {
+        return fetch('/api/llm-key').then(function (r) { return r.json(); }).then(function (d) {
+          if (d.configured) {
+            showButton();
+          } else {
+            showGate();
+          }
+        }).catch(function () {
+          // 检查失败时不阻塞，静默放行
+        });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errBox.hidden = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '验证中…';
+        fetch('/api/llm-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            app_id: appInput.value.trim(),
+            api_key: keyInput.value.trim(),
+          }),
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '保存并使用';
+          if (d.ok && d.verified) {
+            keyInput.value = '';
+            appInput.value = '';
+            showSuccess('API Key 验证成功！页面即将刷新…');
+            setTimeout(function () { window.location.reload(); }, 1500);
+          } else {
+            errBox.textContent = d.error || '验证失败，请检查 Key 是否正确';
+            errBox.hidden = false;
+          }
+        }).catch(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '保存并使用';
+          errBox.textContent = '网络错误，请重试';
+          errBox.hidden = false;
+        });
+      });
+
+      editBtn.addEventListener('click', function () {
+        showGate();
+      });
+
+      checkKey();
+    })();
+
+    fetch('/api/health').then((r) => r.json()).then((d) => {
+      const box = document.getElementById('dbStatus');
+      const text = document.getElementById('dbStatusText');
+      if (d.ok) {
+        box.classList.add('is-ok');
+        text.textContent = `数据库已连接 · MySQL ${d.mysql_version} · ${d.counts.volumes} 册 · ${d.counts.lessons} 课`;
+      } else {
+        box.classList.add('is-err');
+        text.textContent = (d.error || '数据库未连接') + ' — 请检查 .env 中的 DATABASE_URL';
+      }
+    }).catch((e) => {
+      const box = document.getElementById('dbStatus');
+      const text = document.getElementById('dbStatusText');
+      box.classList.add('is-err');
+      text.textContent = '无法连接服务：' + e;
+    });
+  </script>
+</body>
+</html>

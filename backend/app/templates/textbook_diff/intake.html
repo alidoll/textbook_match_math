@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if book_type == "diff_old" %}旧教材{% else %}新教材{% endif %}上传 · 教材对比</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/intake.css?v={{ static_v }}">
+</head>
+<body class="intake-page intake-page--new intake-page--textbook-diff">
+  <header class="intake-hero intake-hero--new">
+    <div class="intake-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        <a class="intake-back" id="intake-back" href="/textbook-diff/workbook">← 返回本册建设</a>
+      </nav>
+      <h1 id="page-title">本册建设</h1>
+      <p class="intake-lead" id="intake-lead" style="color:rgba(255,255,255,0.85);font-size:14px;margin:4px 0 12px;">
+        {% if book_type == "diff_old" %}旧教材{% else %}新教材{% endif %}上传 · 整册预处理（新旧共用同一套流程）
+      </p>
+      <ol class="wb-flow" aria-label="建设流程" style="margin:0;" id="intake-flow">
+        <li><span class="wb-flow-num">1</span>选择册次 · 上传 PDF</li>
+        <li id="flow-step-2"><span class="wb-flow-num">2</span>识别目录 · 划分页码</li>
+        <li id="flow-step-3"><span class="wb-flow-num">3</span>生成页图 · 对比</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="intake-main">
+    <div class="intake-steps-grid intake-steps-grid--new">
+      <section class="intake-panel intake-step" id="upload-card">
+        <div class="intake-step-head">
+          <span class="intake-step-num">1</span>
+          <h2 class="section-title">上传教材 PDF</h2>
+        </div>
+        <p class="hint">完整版用于正式页码与页图；修订版用于对照改页（通常只保留一份，再上传即替换）。</p>
+        <p class="hint pdf-upload-flow-hint">完整版：选文件并上传后，将自动识别目录 → 划分页码 → 生成页图。修订版：点「选择 PDF」后立即上传并替换。</p>
+        <div class="pdf-upload-duo">
+          <div class="pdf-upload-slot">
+            <h3>完整版</h3>
+            <p class="hint">定稿扫描 PDF（全书）</p>
+            <div class="pdf-upload-actions">
+              <label class="btn secondary pdf-file-btn">
+                <input type="file" id="pdf-input-full" accept="application/pdf,.pdf">选择文件
+              </label>
+              <button type="button" class="btn pdf-upload-btn pdf-upload-btn-idle" id="upload-btn-full">上传完整版</button>
+              <button type="button" class="btn secondary" id="clear-full-pdf-btn" hidden>清除完整版</button>
+            </div>
+            <div id="pdf-upload-hint-full" class="pdf-upload-hint" hidden></div>
+            <div id="pdf-meta-full" class="pdf-meta intake-info-box" hidden></div>
+          </div>
+          <div class="pdf-upload-slot pdf-upload-slot--draft">
+            <h3>不完整修订版</h3>
+            <p class="hint">仅含改动页的 PDF；无目录时不要用它做「识别目录」</p>
+            <div class="pdf-upload-actions pdf-upload-actions--draft">
+              <label class="btn secondary pdf-file-btn pdf-file-btn--draft" id="pdf-file-btn-draft">
+                <input type="file" id="pdf-input-draft" accept="application/pdf,.pdf">
+                <span id="pdf-file-btn-draft-text">选择 PDF 上传</span>
+              </label>
+            </div>
+            <div id="pdf-upload-hint-draft" class="pdf-upload-hint" hidden></div>
+            <div id="pdf-drafts-summary" class="pdf-drafts-summary" hidden></div>
+            <div id="pdf-drafts-list" class="pdf-drafts-list">
+              <p class="pdf-drafts-empty">暂无修订版</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="intake-panel intake-step" id="process-card">
+        <div class="intake-step-head">
+          <span class="intake-step-num">2</span>
+          <h2 class="section-title" id="process-title">整册预处理</h2>
+        </div>
+        <p class="hint" id="process-hint">上传完整版后自动依次：识别目录 → 划分页码 → 生成页图（也可手动重跑）。<span id="page-layout-hint"></span></p>
+        <div id="full-process-btns" class="diff-process-btns">
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="catalog-btn" disabled>识别目录</button>
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="parse-btn" disabled>划分页码</button>
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="build-pages-btn" disabled>一键生成页图</button>
+        </div>
+        <div id="draft-process-btns" class="diff-process-btns" hidden>
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="draft-map-btn" disabled>解析印刷页码</button>
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="draft-pages-btn" disabled>生成页图</button>
+        </div>
+        <div id="catalog-meta" class="pdf-meta intake-info-box" hidden></div>
+        <div id="parse-meta" class="pdf-meta intake-info-box intake-info-box--warn" hidden></div>
+        <div id="pages-meta" class="pdf-meta intake-info-box" hidden></div>
+        <div id="draft-meta" class="pdf-meta intake-info-box" hidden></div>
+      </section>
+    </div>
+
+    <section class="intake-panel intake-lessons" id="draft-map-card" hidden>
+      <div class="intake-step-head intake-step-head--lessons">
+        <span class="intake-step-num">3</span>
+        <h2 class="section-title">印刷页码明细</h2>
+        <span class="intake-lessons-hint">印刷页码轨 · 内文语义轨</span>
+        <button type="button" class="btn secondary" id="draft-preview-all-btn">预览全部页图</button>
+      </div>
+      <div class="table-wrap">
+        <table class="intake-table">
+          <thead>
+            <tr>
+              <th>PDF 页</th>
+              <th>印刷页</th>
+              <th>内文</th>
+              <th>预览</th>
+            </tr>
+          </thead>
+          <tbody id="draft-map-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="intake-panel intake-lessons" id="lessons-card" hidden>
+      <div class="intake-step-head intake-step-head--lessons">
+        <span class="intake-step-num">3</span>
+        <h2 class="section-title">课时目录</h2>
+        <span class="intake-lessons-hint">页码校对 · 页图生成</span>
+      </div>
+      <div class="table-wrap">
+        <table class="intake-table">
+          <thead>
+            <tr>
+              <th>单元</th>
+              <th>节</th>
+              <th>页码</th>
+              <th>页图</th>
+            </tr>
+          </thead>
+          <tbody id="lesson-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="intake-toast" hidden></div>
+  <div id="page-preview" class="page-preview" aria-hidden="true">
+    <div class="page-preview-inner">
+      <header class="page-preview-head">
+        <strong id="preview-title"></strong>
+        <button type="button" class="btn secondary" id="preview-close">关闭</button>
+      </header>
+      <div class="page-preview-body">
+        <div id="preview-grid" class="preview-grid"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.DIFF_BOOK_TYPE = {{ book_type|tojson }};
+    window.DIFF_INTAKE_CODE = {{ volume_code|tojson }};
+    window.DIFF_API_PREFIX = '/api/textbook-diff';
+  </script>
+  {% include "_distribution_boot.html" %}
+  <script src="/static/textbook_diff/subjects.js?v={{ static_v }}"></script>
+  <script src="/static/intake_dual_pdf.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/intake.js?v={{ static_v }}"></script>
+</body>
+</html>

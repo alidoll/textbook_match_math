@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>本册建设 · 新旧教材对比</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/textbook_diff/home.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/intake.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_diff/workbook.css?v={{ static_v }}">
+</head>
+<body class="diff-page workbook-page">
+  <header class="diff-hero">
+    <div class="diff-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        <a class="diff-back" id="wb-back-home" href="/textbook-diff/">← 选择学科</a>
+        <a class="diff-back" id="wb-phase-batch-nav" hidden href="/textbook-diff/phase-batch">表格章节环节整理</a>
+      </nav>
+      <h1>本册建设</h1>
+      <p class="diff-lead" id="wb-lead">整册预处理 → 课时粗分 → 逐课对比</p>
+    </div>
+  </header>
+
+  <main class="diff-main workbook-main">
+    <section class="card workbook-card" id="list-panel">
+      <h2 class="diff-section-title" id="list-panel-title">① 新建或打开本册</h2>
+      <p class="diff-section-lead" id="list-panel-lead">不预铺全部年级。只为本学科按需创建要比对的那一本（新旧各一行册次）。点「打开」进入本册工作页（预处理 + 粗分）。</p>
+      <form id="create-form" class="workbook-form">
+        <label>版本
+          <select id="f-edition"></select>
+        </label>
+        <label>年级
+          <input id="f-grade" type="number" min="1" max="12" value="9" required>
+        </label>
+        <label>学期
+          <select id="f-term">
+            <option value="上">上册</option>
+            <option value="下">下册</option>
+          </select>
+        </label>
+        <button type="submit" class="btn">创建本册（旧+新）</button>
+      </form>
+      <div id="xiaoke-editions" hidden>
+        <p class="wb-loading">加载册次…</p>
+      </div>
+      <div id="xk-batch-park" hidden>
+        <input type="file" id="xk-batch-input" accept=".pdf,application/pdf" multiple hidden>
+        <div id="xk-batch-panel" class="tb-batch-panel" hidden>
+          <div class="tb-batch-panel-head">
+            <div class="tb-batch-panel-title">
+              <strong>本版新教材 PDF 上传</strong>
+              <span class="hint" id="xk-batch-summary"></span>
+            </div>
+            <div class="tb-batch-panel-actions">
+              <button type="button" class="btn btn-sm secondary" id="xk-batch-preview-btn" disabled>预览匹配</button>
+              <button type="button" class="btn btn-sm" id="xk-batch-upload-btn" disabled>确认上传</button>
+              <button type="button" class="btn btn-sm secondary" id="xk-batch-close">关闭</button>
+            </div>
+          </div>
+          <div class="table-wrap tb-batch-table-wrap">
+            <table class="tb-batch-table">
+              <thead>
+                <tr>
+                  <th>PDF 文件</th>
+                  <th>匹配册次</th>
+                  <th>置信度</th>
+                  <th>状态</th>
+                  <th>上传进度</th>
+                </tr>
+              </thead>
+              <tbody id="xk-batch-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="xk-coarse-export-panel" class="tb-batch-panel ed-coarse-export-panel" hidden>
+        <div class="tb-batch-panel-head">
+          <div class="tb-batch-panel-title">
+            <strong>下载本版粗分结果</strong>
+            <span class="hint" id="xk-coarse-export-summary"></span>
+          </div>
+          <div class="tb-batch-panel-actions">
+            <button type="button" class="btn btn-sm" id="xk-coarse-export-dl" disabled>开始下载</button>
+            <button type="button" class="btn btn-sm secondary" id="xk-coarse-export-close">关闭</button>
+          </div>
+        </div>
+        <div class="ed-coarse-export-filters">
+          <label><input type="checkbox" id="xk-coarse-include-matched" checked> 已匹配课时</label>
+          <label><input type="checkbox" id="xk-coarse-include-unmatched" checked> 未匹配课时</label>
+          <button type="button" class="btn btn-sm secondary" id="xk-coarse-select-all">全选有结果册</button>
+          <button type="button" class="btn btn-sm secondary" id="xk-coarse-select-none">全不选</button>
+        </div>
+        <div class="table-wrap tb-batch-table-wrap">
+          <table class="tb-batch-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>册次</th>
+                <th>已匹配</th>
+                <th>未匹配</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="xk-coarse-export-rows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="workbook-pair-list" id="pair-list">
+        <p class="hint">加载本册列表…</p>
+      </div>
+    </section>
+
+    <section class="card workbook-card" id="pair-panel" hidden>
+      <h2 class="diff-section-title" id="pair-section-title">② 整册预处理（旧 / 新 各做一遍）</h2>
+      <p class="diff-section-lead" id="pair-meta">—</p>
+
+      <div class="arc-shelf" id="chem-shelf" hidden>
+        <div class="arc-shelf-head">
+          <h3 class="arc-shelf-title">本册馆藏架 · 化学</h3>
+          <p class="arc-shelf-lead">点左格书脊设为旧侧/新侧；上架在下方两栏。右格为对比档案。</p>
+        </div>
+        <div class="arc-case" aria-label="本册馆藏架">
+          <div class="arc-cornice" aria-hidden="true"></div>
+          <div class="arc-case-glow" aria-hidden="true"></div>
+          <div class="arc-bay" data-bay="books">
+            <div class="arc-bay-label">馆藏书脊</div>
+            <div class="arc-spines" id="chem-shelf-list"></div>
+            <div class="arc-plank" aria-hidden="true"></div>
+          </div>
+          <div class="arc-bay" data-bay="compare">
+            <div class="arc-bay-label">当前对照</div>
+            <div class="arc-compare-bay">
+              <div class="arc-picked" id="chem-shelf-picked" aria-hidden="true"></div>
+              <label class="arc-pick">旧侧
+                <select id="chem-shelf-old-select"></select>
+              </label>
+              <label class="arc-pick">新侧
+                <select id="chem-shelf-new-select"></select>
+              </label>
+              <button type="button" class="arc-compare-btn" id="chem-shelf-start-compare">发起对比</button>
+            </div>
+            <div class="arc-plank" aria-hidden="true"></div>
+          </div>
+          <div class="arc-bay" data-bay="archives">
+            <div class="arc-bay-label">对比档案</div>
+            <div class="arc-archives" id="chem-shelf-archives"></div>
+            <div class="arc-plank" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="workbook-sides">
+        <article class="workbook-side" id="side-old"></article>
+        <article class="workbook-side" id="side-new"></article>
+      </div>
+      <div class="xiaoke-edition-catalogs" id="xiaoke-edition-catalogs" hidden>
+        <div class="xiaoke-edition-catalogs-head">
+          <h3 class="xiaoke-edition-catalogs-title">同社全年级旧库目录</h3>
+          <p class="hint" id="xiaoke-edition-catalogs-meta">—</p>
+        </div>
+        <div class="xiaoke-edition-tabs" id="xiaoke-edition-tabs" role="tablist"></div>
+        <div class="xiaoke-edition-body" id="xiaoke-edition-body"></div>
+      </div>
+
+      <!-- 小科新侧：对齐新库建设「上传 + 整册预处理」 -->
+      <div class="xiaoke-new-intake" id="xiaoke-new-intake" hidden>
+        <div class="intake-steps-grid intake-steps-grid--new">
+          <section class="intake-panel intake-step" id="xk-upload-card">
+            <div class="intake-step-head">
+              <span class="intake-step-num">1</span>
+              <h2 class="section-title">上传整册 PDF</h2>
+            </div>
+            <p class="hint">上传新课标完整版 PDF（小科旧侧只读旧库目录，无需上传旧 PDF）。</p>
+            <div class="pdf-upload-actions">
+              <button type="button" class="btn secondary" id="xk-upload-pick-btn">选择 PDF 文件</button>
+              <button type="button" class="btn pdf-upload-btn pdf-upload-btn-idle" id="xk-upload-status-btn" disabled>待上传</button>
+            </div>
+            <div id="xk-pdf-meta" class="pdf-meta intake-info-box" hidden></div>
+          </section>
+
+          <section class="intake-panel intake-step" id="xk-preprocess-card">
+            <div class="intake-step-head">
+              <span class="intake-step-num">2</span>
+              <h2 class="section-title">整册预处理</h2>
+            </div>
+            <p class="hint">一键执行四步（无需单独点「识别目录」）：识别目录 → 划分课时节页码 → 生成页图 → 旧库粗分对照。失败时点「重新预处理」会从识别目录重来。</p>
+            <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="xk-preprocess-btn" disabled title="识别目录、划分页码、生成页图、运行粗分">开始预处理</button>
+            <div id="xk-preprocess-hint" class="pdf-upload-hint" hidden></div>
+            <div id="xk-preprocess-meta" class="intake-layer-progress intake-layer-progress--volume" hidden></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="workbook-preprocess-block" id="wb-preprocess-block" hidden>
+        <h2 class="diff-section-title" id="wb-preprocess-title">② 新侧预处理</h2>
+        <div class="workbook-recognize-bar" id="wb-recognize-bar">
+          <div class="workbook-recognize-row">
+            <button type="button" class="btn" id="btn-one-click-recognize" disabled>
+              一键识别
+            </button>
+            <button type="button" class="btn" id="btn-test-flush-db" title="沙箱学科对比过程只写本地 JSON；点此把已有结果批量写入 MySQL">
+              提交到数据库
+            </button>
+            <button type="button" class="btn btn-ghost" id="btn-test-clear-cache" title="清 OCR/对比/目录缓存，保留课时与粗分">
+              清空测试缓存
+            </button>
+            <button type="button" class="btn btn-ghost btn-danger-ghost" id="btn-test-clear-db" title="清课时/课对/PDF 绑定，保留册次码以便重测">
+              清空测试数据库
+            </button>
+            <p class="hint" id="wb-recognize-hint">请先上传 PDF 后再点一键识别</p>
+          </div>
+          <p class="wb-recognize-eta" id="wb-recognize-eta" hidden></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card workbook-card" id="coarse-panel" hidden>
+      <div class="workbook-coarse-head">
+        <div>
+          <h2 class="diff-section-title" id="coarse-title">③ 课时粗分</h2>
+          <p class="diff-section-lead" id="coarse-lead">目录拆完后的初步课对课匹配；可改对后点「进入对比」。跑完比对后为「待确认」，对比页人工点「确认本课对比」后变为「已确认」。</p>
+        </div>
+        <div class="workbook-coarse-actions" hidden>
+          <button type="button" class="btn" id="btn-coarse">运行粗分</button>
+          <button type="button" class="btn" id="btn-volume-pipeline" title="对本册已匹配的每一课：整课一键 + 环节整理 + 复用建议（模型先判，再按环节对比加权），并写回本表下拉框">整册一键</button>
+          <a class="btn btn-ghost" id="btn-phase-batch" hidden href="/textbook-diff/phase-batch">表格章节环节整理</a>
+          <button type="button" class="btn btn-ghost" id="btn-volume-cancel" hidden title="停止当前整册一键，不再跑后面的课">停止整册</button>
+          <button type="button" class="btn btn-ghost" id="btn-volume-retry-failed" hidden title="只重跑上一轮整册一键中失败的课时">失败重启</button>
+          <button type="button" class="btn btn-ghost" id="btn-export-coarse-xlsx" hidden title="下载课时粗分结果 Excel（出版社 + 新旧年级/册次/单元课时 + 匹配方式）">下载粗分结果</button>
+          <button type="button" class="btn btn-ghost" id="btn-export-xlsx" hidden title="下载整册对比结果 Excel（总表 + 单元表 + 附录识字/写字/词语分表）">下载结果</button>
+        </div>
+      </div>
+      <p class="hint" id="pipeline-status" hidden></p>
+      <div id="coarse-table" class="workbook-coarse-table"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="wb-toast" hidden></div>
+
+  <div id="wb-test-upload-modal" class="wb-upload-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="wb-test-upload-title">
+    <div class="wb-upload-modal-backdrop" data-wb-upload-close></div>
+    <div class="wb-upload-modal-panel" role="document">
+      <header class="wb-upload-modal-head">
+        <div>
+          <h2 id="wb-test-upload-title">① 上传教材 PDF</h2>
+          <p class="hint" id="wb-test-upload-meta">—</p>
+        </div>
+        <button type="button" class="btn secondary wb-upload-modal-close" data-wb-upload-close aria-label="关闭">关闭</button>
+      </header>
+      <div class="wb-upload-modal-body">
+        <section class="intake-panel intake-step" id="upload-card">
+          <div class="intake-step-head">
+            <span class="intake-step-num">1</span>
+            <h2 class="section-title">上传教材 PDF</h2>
+          </div>
+          <p class="hint">完整版用于正式页码与页图；修订版用于对照改页（通常只保留一份，再上传即替换）。</p>
+          <p class="hint pdf-upload-flow-hint">此处<strong>只上传</strong>，不自动识别。选<strong>完整版</strong>或<strong>不完整修订版</strong>后关闭弹窗；两侧都上传完成后，在本册页点「一键识别」依次跑旧→新。</p>
+          <div class="pdf-upload-duo">
+            <div class="pdf-upload-slot">
+              <h3>完整版</h3>
+              <p class="hint">定稿扫描 PDF（全书）</p>
+              <div class="pdf-upload-actions">
+                <label class="btn secondary pdf-file-btn">
+                  <input type="file" id="pdf-input-full" accept="application/pdf,.pdf">选择文件并上传
+                </label>
+                <button type="button" class="btn secondary" id="clear-full-pdf-btn" hidden>清除完整版</button>
+              </div>
+            </div>
+            <div class="pdf-upload-slot pdf-upload-slot--draft">
+              <h3>不完整修订版</h3>
+              <p class="hint">仅含改动页的 PDF；无目录时不要用它做「识别目录」</p>
+              <div class="pdf-upload-actions pdf-upload-actions--draft">
+                <label class="btn secondary pdf-file-btn pdf-file-btn--draft" id="pdf-file-btn-draft">
+                  <input type="file" id="pdf-input-draft" accept="application/pdf,.pdf">
+                  <span id="pdf-file-btn-draft-text">选择 PDF 上传</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  {% include "_distribution_boot.html" %}
+  <script src="/static/textbook_diff/subjects.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/workbook_test_upload.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/workbook_xiaoke_intake.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/workbook.js?v={{ static_v }}"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>选题制作 · 新课入口</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/home.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/selection/hub.css?v={{ static_v }}">
+</head>
+<body class="home-page home-page-hub sel-hub">
+  <header class="home-hero">
+    <div class="home-hero-inner">
+      <p class="home-hub-back"><a href="/">← 首页</a></p>
+      <h1>选题制作</h1>
+      <p class="home-lead">新课入口 → 齐套 → 交选题虾 → 登记 paper → 审题换题（无赋分）</p>
+    </div>
+  </header>
+
+  <main class="home-hub-panel sel-panel">
+    <section class="home-hub-card sel-toolbar" id="panel-filters">
+      <p class="sel-hint sel-hint-top">先选版本 → 年级 → 学期，课表会自动列出；再用课名搜索精确定位。</p>
+      <div class="sel-filters">
+        <label class="sel-filter">
+          <span>版本</span>
+          <select id="f-edition">
+            <option value="">请选择版本</option>
+          </select>
+        </label>
+        <label class="sel-filter">
+          <span>年级</span>
+          <select id="f-grade" disabled>
+            <option value="">请先选版本</option>
+          </select>
+        </label>
+        <label class="sel-filter">
+          <span>学期</span>
+          <select id="f-semester" disabled>
+            <option value="">请先选年级</option>
+          </select>
+        </label>
+        <label class="sel-filter sel-filter-grow">
+          <span>课名 / 单元搜索</span>
+          <input id="f-q" type="search" placeholder="如：变色游戏" autocomplete="off">
+        </label>
+        <span id="list-meta" class="sel-summary"></span>
+      </div>
+    </section>
+
+    <section id="panel-lessons" class="home-hub-card sel-table-card">
+      <div class="sel-table-wrap">
+        <table class="sel-table" id="lesson-table">
+          <thead>
+            <tr>
+              <th>版本</th>
+              <th>册类型</th>
+              <th>年级学期</th>
+              <th>单元</th>
+              <th>课号</th>
+              <th>新课名</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lesson-tbody">
+            <tr><td colspan="7" class="sel-empty">请先选择版本（下拉框）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="panel-workspace" class="home-hub-card sel-workspace" hidden>
+      <div class="sel-ws-head">
+        <div>
+          <h2 id="ws-title">工作台</h2>
+          <p id="ws-sub" class="sel-ws-sub"></p>
+        </div>
+        <button type="button" id="btn-back" class="sel-btn">← 返回课表</button>
+      </div>
+
+      <div class="sel-tabs" id="product-tabs" role="tablist">
+        <button type="button" data-product="practice" class="sel-tab is-active" role="tab">本课练习</button>
+        <button type="button" data-product="station" class="sel-tab" role="tab">本课加油站</button>
+        <button type="button" data-product="unit_exam" class="sel-tab" role="tab">本单元卷</button>
+      </div>
+
+      <h3 class="sel-section-title">齐套门禁</h3>
+      <div id="gates" class="sel-gates" aria-live="polite"></div>
+
+      <div id="brief-box" class="sel-brief" hidden>
+        <h3 class="sel-section-title">KP / 需求报告</h3>
+        <p class="sel-hint">齐套后可编辑 KP / 题型计划 / 备注；交虾时写入需求包。初值来自新课件 OCR。</p>
+        <label class="sel-label" for="brief-kp">知识点（KP，JSON 数组）</label>
+        <textarea id="brief-kp" class="sel-textarea" rows="6" placeholder='[{"name":"…","weight":1}]'></textarea>
+        <label class="sel-label" for="brief-notes">备注 / 题量说明</label>
+        <textarea id="brief-notes" class="sel-textarea" rows="3" placeholder="可补充需求说明（交虾写入 notes）"></textarea>
+        <label class="sel-label" for="brief-plan">题型计划（JSON 数组）</label>
+        <textarea id="brief-plan" class="sel-textarea" rows="4" placeholder='[{"type":"practice","count":9}]'></textarea>
+      </div>
+
+      <div id="old-disp-box" class="sel-old-disp" hidden>
+        <h3 class="sel-section-title">旧题处置</h3>
+        <p class="sel-hint">先爬题（或粘贴缓存）再标 reuse / replace / drop。全部处置完成后方可交虾；第1轮只交缺口，不附旧池整包 id。</p>
+        <div id="gap-summary" class="sel-gap-summary" aria-live="polite"></div>
+        <div class="sel-actions sel-actions-tight">
+          <button type="button" id="btn-fetch-old" class="sel-btn">批量爬取</button>
+          <button type="button" id="btn-disp-complete" class="sel-btn" disabled>标记处置完成</button>
+        </div>
+        <div class="sel-table-wrap sel-disp-wrap">
+          <table class="sel-table" id="old-disp-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>queId</th>
+                <th>爬取</th>
+                <th>题干摘要</th>
+                <th>处置</th>
+                <th>备注</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="old-disp-tbody">
+              <tr><td colspan="7" class="sel-empty">暂无旧题池</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="manual-cache-box" class="sel-manual-cache">
+          <label class="sel-label" for="manual-cache-qid">人工粘贴题面缓存（manual 兜底）</label>
+          <div class="sel-manual-row">
+            <input id="manual-cache-qid" type="text" placeholder="que_id" class="sel-input">
+            <button type="button" id="btn-manual-cache" class="sel-btn">写入缓存</button>
+          </div>
+          <textarea id="manual-cache-payload" class="sel-textarea" rows="4" placeholder='{"stem":"题干…","options":[],"answer":"","analysis":""}'></textarea>
+        </div>
+        <div id="demand-box" class="sel-demand">
+          <h3 class="sel-section-title">第1轮缺口需求</h3>
+          <div class="sel-actions sel-actions-tight">
+            <button type="button" id="btn-load-demand" class="sel-btn" disabled>加载 demand</button>
+            <button type="button" id="btn-copy-demand-md" class="sel-btn" disabled>复制 Markdown</button>
+            <button type="button" id="btn-copy-demand-json" class="sel-btn" disabled>复制 JSON</button>
+            <button type="button" id="btn-dl-demand-json" class="sel-btn" disabled>下载 JSON</button>
+          </div>
+          <pre id="demand-preview" class="sel-pre sel-pre-demand" hidden></pre>
+        </div>
+      </div>
+
+      <div class="sel-actions">
+        <button type="button" id="btn-refresh-ws" class="sel-btn">刷新齐套</button>
+        <button type="button" id="btn-handoff" class="sel-btn sel-btn-primary" disabled>交虾（下载需求包）</button>
+      </div>
+      <p id="ws-msg" class="sel-status" aria-live="polite"></p>
+
+      <div id="candidates-box" class="sel-candidates" hidden>
+        <h3 class="sel-section-title">回传登记</h3>
+        <p class="sel-hint">粘贴虾回传 items JSON 数组；bank/adapt 须有 que_id，diy 须有题面。登记后自动爬取有 id 的题。</p>
+        <label class="sel-label" for="cand-round">轮次</label>
+        <input id="cand-round" type="number" min="1" value="1" class="sel-input sel-input-sm">
+        <label class="sel-label" for="cand-items">items（JSON 数组）</label>
+        <textarea id="cand-items" class="sel-textarea" rows="8" placeholder='[{"slot":1,"source":"bank","que_id":"…","kp":["变色"]},{"slot":2,"source":"diy","diy":{"stem":"…"},"kp":[]}]'></textarea>
+        <div class="sel-actions sel-actions-tight">
+          <button type="button" id="btn-register-cand" class="sel-btn sel-btn-primary">登记候选</button>
+        </div>
+
+        <h3 class="sel-section-title">审题台</h3>
+        <div id="candidates-list" class="sel-cand-list"></div>
+
+        <div id="next-demand-box" class="sel-demand">
+          <h3 class="sel-section-title">下一轮增量需求</h3>
+          <div class="sel-actions sel-actions-tight">
+            <button type="button" id="btn-load-next-demand" class="sel-btn">加载 demand-next</button>
+            <button type="button" id="btn-copy-next-md" class="sel-btn" disabled>复制 Markdown</button>
+            <button type="button" id="btn-copy-next-json" class="sel-btn" disabled>复制 JSON</button>
+          </div>
+          <pre id="next-demand-preview" class="sel-pre sel-pre-demand" hidden></pre>
+        </div>
+      </div>
+
+      <div id="finalize-box" class="sel-finalize" hidden>
+        <h3 class="sel-section-title">定稿</h3>
+        <p class="sel-hint">reuse + keep ≥ 目标题量后可确认。展示卷内带 id 题面（缓存）与 DIY 存稿。</p>
+        <div id="finalize-preview" class="sel-finalize-preview"></div>
+        <div class="sel-actions sel-actions-tight">
+          <button type="button" id="btn-finalize" class="sel-btn sel-btn-primary">确认定稿</button>
+        </div>
+        <pre id="finalize-result" class="sel-pre" hidden></pre>
+      </div>
+
+      <div id="review-box" class="sel-review" hidden>
+        <h3 class="sel-section-title">审题壳（paper 回写后）</h3>
+        <div id="paper-link" class="sel-paper-row"></div>
+        <div id="review-readonly" class="sel-review-readonly" hidden>
+          <label class="sel-label" for="review-diff">比对摘要（只读）</label>
+          <pre id="review-diff" class="sel-pre"></pre>
+          <label class="sel-label" for="review-kp">新课件 KP（只读）</label>
+          <pre id="review-kp" class="sel-pre"></pre>
+          <label class="sel-label" for="review-qids">本包 question_ids（只读）</label>
+          <pre id="review-qids" class="sel-pre"></pre>
+        </div>
+        <label class="sel-label" for="change-notes">换题说明</label>
+        <textarea id="change-notes" class="sel-textarea" rows="3" placeholder="下载给虾的修改需求说明"></textarea>
+        <button type="button" id="btn-change-json" class="sel-btn">下载修改需求 JSON</button>
+      </div>
+    </section>
+
+    <details id="panel-import" class="home-hub-card sel-import">
+      <summary>资源 / 导入（运维）</summary>
+      <p class="sel-hint">旧题台账 from-default 全量导入，默认不作为选题入口。</p>
+      <button type="button" id="btn-import" class="sel-btn sel-btn-primary">从 base_data 导入全量表</button>
+      <pre id="import-result" class="sel-pre"></pre>
+    </details>
+  </main>
+
+  <footer class="home-footer">selection hub · new-lesson entry</footer>
+  <script src="/static/selection/hub.js?v={{ static_v }}"></script>
+</body>
+</html>

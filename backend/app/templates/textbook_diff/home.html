@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新旧教材对比 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/textbook_diff/home.css?v={{ static_v }}">
+</head>
+<body class="diff-page">
+  <header class="diff-hero">
+    <div class="diff-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        {% include "_nav_home.html" %}
+      </nav>
+      <h1>新旧教材对比</h1>
+      <p class="diff-lead">请先选择学科，进入本册建设</p>
+    </div>
+  </header>
+
+  <main class="diff-main">
+    <section class="diff-subject-gate card" aria-label="选择学科">
+      <h2 class="diff-section-title">选择学科</h2>
+      <p class="diff-section-lead">当前开放化学、语文、数学、生物、Test、小科。小学科学请走「小科」。点选某一学科后进入本册建设。</p>
+      <div class="diff-subject-grid" id="diff-subject-grid"></div>
+    </section>
+  </main>
+
+  <footer class="diff-footer">textbook-match</footer>
+  {% include "_distribution_boot.html" %}
+  <script src="/static/textbook_diff/subjects.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/home.js?v={{ static_v }}"></script>
+</body>
+</html>

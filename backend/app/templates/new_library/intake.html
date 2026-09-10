@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>本册建设 · 新教材</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/intake.css?v={{ static_v }}">
+</head>
+<body class="intake-page intake-page--new">
+  <header class="intake-hero intake-hero--new">
+    <div class="intake-hero-inner">
+      <a class="intake-back" id="intake-back-link" href="/new-library/">← 新库建设</a>
+      <h1 id="page-title">本册建设</h1>
+      <div class="intake-meta" id="page-sub">加载中…</div>
+    </div>
+  </header>
+
+  <main class="intake-main">
+    <nav class="volume-pipeline intake-panel" id="volume-pipeline" aria-label="本册建设进度" hidden>
+      <div class="intake-focus-ribbon intake-pipeline-ribbon" id="pipeline-ribbon" hidden></div>
+      <div class="volume-pipeline-track" id="volume-pipeline-track">
+        <div class="volume-pipeline-rail" id="volume-pipeline-rail" aria-hidden="true"></div>
+        <div class="volume-pipeline-fill" id="volume-pipeline-fill" aria-hidden="true"></div>
+        <div class="volume-pipeline-walker" id="volume-pipeline-walker" aria-hidden="true" title="建设进度">
+          <svg class="walker-svg walker-svg--book" viewBox="0 0 32 40" width="28" height="35" aria-hidden="true">
+            <ellipse class="walker-shadow" cx="16" cy="38" rx="7" ry="2"/>
+            <g class="walker-book-body">
+              <path class="walker-book-l" d="M6 13 Q16 9 16 9 L16 29 Q10 31 6 27 Z"/>
+              <path class="walker-book-r" d="M16 9 Q26 9 26 13 L26 27 Q22 31 16 29 Z"/>
+              <line class="walker-spine" x1="16" y1="9" x2="16" y2="29"/>
+              <circle class="walker-eye" cx="20.5" cy="19" r="1.3"/>
+              <circle class="walker-eye" cx="23.5" cy="19" r="1.3"/>
+              <path class="walker-smile" d="M19.5 22 Q22 24 24.5 22"/>
+            </g>
+            <g class="walker-leg-l"><line x1="12" y1="29" x2="10" y2="36"/></g>
+            <g class="walker-leg-r"><line x1="20" y1="29" x2="22" y2="36"/></g>
+          </svg>
+        </div>
+        <ol class="volume-pipeline-nodes" id="volume-pipeline-steps"></ol>
+      </div>
+    </nav>
+
+    <div class="intake-steps-grid intake-steps-grid--new">
+      <section class="intake-panel intake-step" id="upload-card">
+        <div class="intake-focus-ribbon" hidden></div>
+        <div class="intake-step-head">
+          <span class="intake-step-num">1</span>
+          <h2 class="section-title">上传整册 PDF</h2>
+        </div>
+        <p class="hint">主存写入数据库，并镜像到 <code>data/new-textbook/{版本}/{volume_code}.pdf</code>。</p>
+        <div class="pdf-upload-actions">
+          <label class="btn secondary pdf-file-btn">
+            <input type="file" id="pdf-input" accept="application/pdf,.pdf">
+            选择 PDF 文件
+          </label>
+          <button type="button" class="btn pdf-upload-btn pdf-upload-btn-idle" id="upload-btn" disabled>确认上传</button>
+        </div>
+        <div id="pdf-upload-hint" class="pdf-upload-hint" hidden></div>
+        <div id="pdf-meta" class="pdf-meta intake-info-box" hidden></div>
+      </section>
+
+      <section class="intake-panel intake-step" id="preprocess-card">
+        <div class="intake-focus-ribbon" hidden></div>
+        <div class="intake-step-head">
+          <span class="intake-step-num">2</span>
+          <h2 class="section-title">整册预处理</h2>
+        </div>
+        <p class="hint">一键执行：识别目录 → 划分课时节页码 → 生成页图 → 旧库粗分对照。划分完成后请在下方表中校对页码并保存，再继续页图与粗分。</p>
+        <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="preprocess-btn" disabled title="识别目录、划分页码、生成页图、运行粗分">开始预处理</button>
+        <div id="preprocess-hint" class="pdf-upload-hint" hidden></div>
+        <div id="preprocess-meta" class="intake-layer-progress intake-layer-progress--volume" hidden>
+          <div class="block-batch-segwrap" id="preprocess-segtrack" role="progressbar" aria-label="整册预处理">
+            <div class="block-batch-segtrack"></div>
+          </div>
+          <span class="cw-batch-progress-label" id="preprocess-label"></span>
+        </div>
+        <div id="catalog-meta" class="pdf-meta intake-info-box" hidden></div>
+        <div id="parse-meta" class="pdf-meta intake-info-box intake-info-box--warn" hidden></div>
+      </section>
+    </div>
+
+    <section class="intake-panel intake-lessons" id="lessons-card" hidden>
+      <div class="intake-focus-ribbon" hidden></div>
+      <div class="intake-step-head intake-step-head--lessons intake-lessons-head">
+        <div>
+          <span class="intake-step-num">3</span>
+          <h2 class="section-title">课时目录</h2>
+          <span class="intake-lessons-hint">页码校对 · 对照分析 · 建块与锚定</span>
+        </div>
+        <div class="intake-lessons-actions">
+          <button type="button" class="btn btn-sm secondary block-batch-run-btn" id="analysis-batch-btn" disabled title="文字OCR → 图片OCR → 整理原子 → 栏目·块名 → 对照预判 → 确认对照">批量对照分析</button>
+          <button type="button" class="btn btn-sm block-batch-run-btn" id="block-anchor-batch-btn" disabled title="逐课建块与锚定；行内查看进度">整册建块</button>
+        </div>
+      </div>
+      <p class="block-batch-hint hint" id="analysis-batch-hint" hidden>
+        批量对照分析进行中（文字OCR → 图片OCR → 整理原子 → 栏目·块名 → 对照预判）：点行内「建块」可在<strong>新标签</strong>打开，本页继续刷新进度；行内「对照分析」可单独重试某一课。若要停止后续课时，
+        <button type="button" class="linkish block-batch-cancel-btn" id="analysis-batch-cancel-btn">取消任务</button>
+      </p>
+      <p class="block-batch-hint hint" id="block-anchor-batch-hint" hidden>
+        整册建块进行中（认栏目头 → 原子分组 → 合并碎块 → 对照建块 → 挂旧块锚）：点行内「建块」可在<strong>新标签</strong>打开详情；若要停止后续课时，
+        <button type="button" class="linkish block-batch-cancel-btn" id="block-anchor-batch-cancel-btn">取消任务</button>
+      </p>
+
+      <div id="course-meta" class="pdf-meta intake-info-box" hidden></div>
+      <div class="table-wrap">
+        <table class="intake-table">
+          <thead>
+            <tr>
+              <th class="lesson-expand-col" aria-label="展开"></th>
+              <th>单元</th>
+              <th>节</th>
+              <th>粗分</th>
+              <th>页码</th>
+              <th>页图</th>
+              <th>对照分析</th>
+              <th>建块与锚定</th>
+            </tr>
+          </thead>
+          <tbody id="lesson-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="intake-toast" hidden></div>
+  <div id="page-preview" class="page-preview" aria-hidden="true">
+    <div class="page-preview-inner">
+      <header class="page-preview-head">
+        <strong id="preview-title"></strong>
+        <button type="button" class="btn secondary" id="preview-close">关闭</button>
+      </header>
+      <div class="page-preview-body">
+        <div id="preview-grid" class="preview-grid"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.INTAKE_VOLUME_CODE = {{ volume_code|tojson }};
+    window.INTAKE_API_PREFIX = '/api/new-library';
+  </script>
+  <script src="/static/new_library/intake.js?v={{ static_v }}"></script>
+</body>
+</html>

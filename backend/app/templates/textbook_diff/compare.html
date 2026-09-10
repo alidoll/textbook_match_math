@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新旧教材对比 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/textbook_diff/compare.css?v={{ static_v }}">
+</head>
+<body class="diff-compare-page">
+  <header class="diff-compare-hero">
+    <div class="diff-compare-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        {% include "_nav_home.html" %}
+        <a class="diff-compare-back" id="diff-compare-back" href="/textbook-diff/">← 教材对比</a>
+      </nav>
+      <h1>新旧教材对比</h1>
+      <p class="diff-compare-lead" id="diff-compare-lead">预览页或课时匹配后，进入左旧右新原子对照</p>
+    </div>
+  </header>
+
+  <main class="diff-compare-main">
+    <section class="diff-compare-select card">
+      <div class="diff-select-group">
+        <label>
+          <span>旧教材</span>
+          <select id="old-select">
+            <option value="">— 选择册次 —</option>
+          </select>
+        </label>
+        <label>
+          <span>新教材</span>
+          <select id="new-select">
+            <option value="">— 选择册次 —</option>
+          </select>
+        </label>
+      </div>
+      <button type="button" class="btn" id="compare-btn" disabled>开始对比</button>
+    </section>
+
+    <section id="compare-hint" class="diff-compare-hint card" hidden></section>
+
+    <section id="compare-result-preview" hidden>
+      <div class="diff-preview-summary card" id="preview-summary" hidden></div>
+      <div class="card diff-preview-list-wrap">
+        <h3 class="diff-section-title">预览页对照（粗分映射旧书页/课时）</h3>
+        <p class="diff-list-lead">每行右侧点「对比」进入左旧右新工作台，运行文字 OCR + 豆包插图 OCR + 原子锚定。</p>
+        <div class="diff-preview-list" id="preview-list"></div>
+      </div>
+    </section>
+
+    <section id="compare-result-lessons" hidden>
+      <div class="card diff-preview-list-wrap">
+        <h3 class="diff-section-title">课时对照（同版本 · 同年级 · 同学期）</h3>
+        <p class="diff-list-lead">新课标课时与旧教材课时一一匹配，点「对比」进入左旧右新页面识别原子。</p>
+        <div class="diff-lesson-pair-list" id="lesson-pair-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="diff-compare-toast" hidden></div>
+  {% include "_distribution_boot.html" %}
+  <script src="/static/textbook_diff/subjects.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/compare.js?v={{ static_v }}"></script>
+</body>
+</html>

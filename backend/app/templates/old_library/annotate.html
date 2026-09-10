@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if ui_shell == 'textbook_library' %}课时标注{% else %}旧侧建块{% endif %} · {{ page_title }}</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/annotate.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/new_library/annotate.css?v={{ static_v }}">
+</head>
+<body class="annotate-layout annotate-layout-old" data-ui-shell="{{ ui_shell|default('old_library') }}">
+  <header class="annotate-hero annotate-hero-new" data-ui-build="{{ static_v }}">
+    <div class="annotate-hero-inner">
+      <div class="annotate-hero-topbar">
+        <button type="button" class="annotate-back" id="annotate-close-btn" title="{% if ui_shell == 'textbook_library' %}回到本册入馆{% else %}关闭本页，回到整册建设标签{% endif %}">← 返回</button>
+      </div>
+      <div class="annotate-hero-titlebar">
+        <h1 id="page-title">{{ page_title }}</h1>
+        <div class="annotate-meta annotate-meta-inline" id="page-sub">加载中…</div>
+      </div>
+      <nav class="build-step-toolbar" id="build-step-toolbar" aria-label="建块流程">
+        <span class="build-step-group" id="step-group-pipeline" data-step="pipeline">
+          <button type="button" class="build-step-btn" id="full-pipeline-btn" title="豆包文字 OCR → 图片 OCR → 建块">一键全流程</button>
+        </span>
+        <span class="build-step-group build-step-subtrack-inline" id="step-group-substeps" data-phase="pipeline" aria-label="分步执行">
+          <button type="button" class="build-step-btn build-step-btn--mini build-step-substep-btn" id="substep-ocr" data-substep="ocr" title="仅对本课全部教材页执行 OCR，不整理、不建块">① OCR</button>
+          <button type="button" class="build-step-btn build-step-btn--mini build-step-substep-btn" id="substep-ocr-text" data-substep="ocr-text" hidden title="豆包识字：教材页文字原子 + 课件页文字（写库，与双轨缓存共用）">① 文字OCR</button>
+          <button type="button" class="build-step-btn build-step-btn--mini build-step-substep-btn" id="substep-ocr-image" data-substep="ocr-image" hidden title="插图识别：教材 image 原子 + 课件页插图/图表区域（与双轨缓存共用）">② 图片OCR</button>
+          <button type="button" class="build-step-btn build-step-btn--mini build-step-substep-btn" id="substep-curate" data-substep="curate" title="版面整理（试点课跳过）；不建块">② 整理</button>
+          <button type="button" class="build-step-btn build-step-btn--mini build-step-substep-btn" id="substep-prematch" data-substep="prematch" hidden title="课件预匹配：按 slide OCR 拆/合原子，不写区块">③ 预匹配</button>
+          <button type="button" class="build-step-btn build-step-btn--mini build-step-substep-btn" id="substep-seed" data-substep="seed" title="AI 建块（需先 OCR + 预匹配）">④ 建块</button>
+        </span>
+        <span class="build-step-pilot-badge hint" id="pipeline-pilot-badge" hidden></span>
+        <span class="build-step-group" id="step-group-blocks" data-step="blocks">
+          <span class="build-step-group-label" title="核对后保存锁定">⑤</span>
+          <button type="button" class="build-step-btn build-step-btn--mini blocks-save-btn" id="lock-blocks-btn" title="核对无误后保存并锁定本课全部区块">保存</button>
+          <button type="button" class="build-step-btn build-step-btn--mini" id="unlock-blocks-btn" hidden title="解除锁定后可继续编辑">解锁区块</button>
+        </span>
+        <span class="build-step-status hint" id="build-step-status"></span>
+      </nav>
+      <div class="build-step-progress-wrap" id="build-step-progress-wrap" hidden>
+        <span class="build-step-progress-heading">总进度</span>
+        <div class="build-step-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div class="build-step-progress-fill" id="build-step-progress-fill"></div>
+        </div>
+        <span class="build-step-progress-label" id="build-step-progress-label"></span>
+      </div>
+      <div class="ocr-phase-detail" id="ocr-phase-detail" hidden aria-label="OCR 分项进度">
+        <ul class="ocr-phase-grid">
+          <li class="ocr-phase-item" id="ocr-phase-tb-text-row" data-key="tb-text">
+            <span class="ocr-phase-label">教材文字</span>
+            <span class="ocr-phase-value" id="ocr-phase-tb-text">—</span>
+          </li>
+          <li class="ocr-phase-item" id="ocr-phase-cw-text-row" data-key="cw-text">
+            <span class="ocr-phase-label">课件文字</span>
+            <span class="ocr-phase-value" id="ocr-phase-cw-text">—</span>
+          </li>
+          <li class="ocr-phase-item" id="ocr-phase-tb-image-row" data-key="tb-image">
+            <span class="ocr-phase-label">教材插图</span>
+            <span class="ocr-phase-value" id="ocr-phase-tb-image">—</span>
+          </li>
+          <li class="ocr-phase-item" id="ocr-phase-cw-image-row" data-key="cw-image">
+            <span class="ocr-phase-label">课件插图</span>
+            <span class="ocr-phase-value" id="ocr-phase-cw-image">—</span>
+          </li>
+        </ul>
+        <p class="ocr-phase-warnings hint" id="ocr-phase-warnings" hidden></p>
+      </div>
+      <details class="build-step-advanced" id="build-step-advanced">
+        <summary>高级 / 单页调试</summary>
+        <span class="build-step-group" id="step-group-atoms" data-step="atoms">
+          <span class="build-step-group-label" title="单页 OCR 与整理">页</span>
+          <button type="button" class="build-step-btn build-step-btn--mini" id="extract-lesson-btn" title="同顶部 ① OCR">OCR 全课</button>
+          <button type="button" class="build-step-btn build-step-btn--mini" id="ai-curate-lesson-btn" title="同顶部 ② 整理">AI 整理全课</button>
+          <button type="button" class="build-step-btn build-step-btn--mini" id="ai-bootstrap-btn" title="同顶部 ③ 建块">AI 建块</button>
+        </span>
+        <details class="pipeline-review-wrap" id="pipeline-review-wrap" hidden>
+          <summary class="pipeline-review-summary">
+            <span class="pipeline-review-title">课件预匹配检视</span>
+            <span class="pipeline-review-status hint" id="prematch-review-status">—</span>
+          </summary>
+          <div class="pipeline-review-panel">
+            <div class="pipeline-review-tabs" role="tablist">
+              <button type="button" class="pipeline-review-tab is-active" data-tab="splits" role="tab">拆分</button>
+              <button type="button" class="pipeline-review-tab" data-tab="refs" role="tab">插图引用</button>
+              <button type="button" class="pipeline-review-tab" data-tab="groups" role="tab">并列图组</button>
+            </div>
+            <div class="pipeline-review-body" id="pipeline-review-body"></div>
+          </div>
+        </details>
+      </details>
+    </div>
+  </header>
+
+  <div class="annotate-grid">
+    <section class="card annotate-col slides-col" id="slides-col">
+      <div class="col-head">
+        <h2>课件预览</h2>
+        <p class="col-hint">点击缩略图放大 · 勾选课件页加入区块</p>
+      </div>
+      <div class="slides-body">
+        <div class="slide-preview-main" id="slide-preview-main">
+          <p class="hint">暂无课件，请返回课时接入页上传 ZIP</p>
+        </div>
+        <div id="slides-list" class="thumb-strip"></div>
+      </div>
+    </section>
+
+    <section class="card annotate-col annotate-mid" id="textbook-col">
+      <div class="col-head col-head--toolbar">
+        <h2>教材页 + 原子</h2>
+      </div>
+      <p id="atom-pipeline-hint" class="atom-pipeline-hint hint" hidden>请先完成顶部 ③「建块」；建块完成后可在此修正原子。</p>
+      <div class="atom-actions atom-toolbar" id="atom-actions" hidden>
+        <span id="atom-selection-label" class="atom-selection-summary hint">未选中原子</span>
+        <div class="atom-actions-btns">
+        <button type="button" class="btn secondary" id="unmerge-ocr-btn" disabled title="将误合并的原子拆回 OCR 碎块；可双击原子框">拆回 OCR</button>
+        <button type="button" class="btn secondary" id="undo-atoms-btn" disabled title="恢复上一步删除/合并">撤销上一步</button>
+        <button type="button" class="btn secondary" id="merge-atoms-btn" disabled>合并选中</button>
+        <button type="button" class="btn secondary" id="delete-atoms-btn" disabled>删除选中</button>
+        <button type="button" class="btn-link" id="clear-atoms-btn" hidden>取消选择</button>
+        <label class="atom-tag-toggle" title="隐藏方框上的编号标签，便于看清边界">
+          <input type="checkbox" id="hide-atom-tags-checkbox"> 隐藏标签
+        </label>
+        </div>
+      </div>
+      <div class="tb-body">
+        <div class="tb-viewport-shell">
+          <button type="button" class="preview-nav-arrow preview-nav-prev" id="tb-prev-btn" aria-label="上一页">
+            <span class="preview-nav-arr">◀</span><span class="preview-nav-lbl">上一页</span>
+          </button>
+          <div class="tb-viewport" id="tb-viewport">
+            <img id="tb-image" alt="教材页" hidden>
+            <div id="atom-layer"></div>
+          </div>
+          <button type="button" class="preview-nav-arrow preview-nav-next" id="tb-next-btn" aria-label="下一页">
+            <span class="preview-nav-arr">▶</span><span class="preview-nav-lbl">下一页</span>
+          </button>
+        </div>
+        <div class="textbook-page-nav" id="textbook-page-nav">
+          <span class="tb-page-info" id="tb-page-info"></span>
+            <div class="textbook-page-nav-actions">
+            <button type="button" class="btn tb-save-page-btn btn-sm" id="save-atoms-btn" hidden title="保存本页原子编号与框选结果">保存本页</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card annotate-col" id="blocks-col">
+      <div class="col-head">
+        <h2>教学区块 <span class="blocks-count-badge" id="blocks-count"></span><span class="blocks-locked-badge" id="blocks-locked-badge" hidden>已锁定</span></h2>
+      </div>
+      <div class="block-form" id="block-form-wrap" hidden>
+        <select id="block-stage-ref" class="block-stage-ref" title="课件教学环节（如：课件名称页、导入）；可选自设">
+          <option value="">— 环节参考 —</option>
+        </select>
+        <input type="text" id="block-stage-custom" class="block-stage-custom" placeholder="自设环节" hidden>
+        <input type="text" id="block-name" placeholder="区块名称（知识点），如：题目推拉游戏">
+        <button type="button" class="btn" id="create-block-btn">创建区块</button>
+        <button type="button" class="btn secondary danger" id="delete-all-blocks-btn" hidden title="清空本课全部区块，便于先核对 OCR/整理">一键清空区块</button>
+        <button type="button" class="btn-link" id="cancel-block-edit-btn" hidden>取消编辑</button>
+      </div>
+      <details class="annotate-tips">
+        <summary>操作说明</summary>
+        <ul>
+          <li>每个区块有<strong>环节参考</strong>（码表或自设，如「课件名称页」）和<strong>区块名称</strong>（具体知识点，如「题目推拉游戏」）</li>
+          <li>勾选左侧课件与中间原子后点「创建区块」；编辑时可在卡片内分别修改</li>
+          <li>流程：顶部可<strong>分步</strong>点 ① OCR → ② 整理 → ③ 建块，或「一键全流程」；建块后展开人工修正，核对无误点 <strong>保存</strong></li>
+          <li>误点 ③ 建块时可点「<strong>一键清空区块</strong>」，先核对 OCR/整理再重新建块</li>
+          <li>人工修正：中间列可合并/删除/拆回 OCR 原子；右侧可编辑区块绑定；改完点「保存本页」</li>
+        </ul>
+      </details>
+      <div class="blocks-col-scroll">
+        <ul id="blocks-list" class="blocks-list"></ul>
+      </div>
+      <div class="blocks-page-nav" id="blocks-page-nav">
+        <span class="blocks-nav-hint" id="blocks-nav-hint"></span>
+        <div class="blocks-page-nav-actions-scroll">
+          <div class="blocks-page-nav-actions" hidden aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="slide-bound-modal" class="annotate-modal" hidden>
+    <div class="annotate-modal-backdrop" data-modal-close></div>
+    <div class="annotate-modal-panel" role="dialog" aria-labelledby="slide-bound-modal-title">
+      <div class="annotate-modal-header">
+        <h3 id="slide-bound-modal-title">⚠️ 该课件页已被绑定</h3>
+        <button type="button" class="annotate-modal-close" data-modal-close aria-label="关闭">×</button>
+      </div>
+      <div class="annotate-modal-body" id="slide-bound-modal-body"></div>
+      <div class="annotate-modal-footer">
+        <button type="button" class="btn" id="slide-bound-modal-goto">去修改</button>
+        <button type="button" class="btn secondary" data-modal-close>关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" hidden></div>
+  <script>
+    window.ANNOTATE_LESSON_UID = {{ lesson_uid|tojson }};
+    window.ANNOTATE_API_PREFIX = '/api/old-library';
+    window.UI_SHELL = {{ (ui_shell|default('old_library'))|tojson }};
+    window.INTAKE_RETURN_URL = {{ (intake_return_url|default(''))|tojson }};
+  </script>
+  <script src="/static/old_library/annotate.js?v={{ static_v }}"></script>
+</body>
+</html>

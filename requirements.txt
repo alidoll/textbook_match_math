@@ -1,0 +1,27 @@
+# textbook-match 本地开发（Python 3.12，venv + pip）
+# 用法见 docs/mysql-remote-connect.md 第五节
+
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.0
+SQLAlchemy>=2.0.0
+mysql-connector-python>=8.3.0
+python-dotenv>=1.0.0
+cryptography>=42.0.0
+openpyxl>=3.1.0
+numpy>=1.24.0
+opencv-python-headless>=4.8.0
+rapidfuzz>=3.9.0
+pdfplumber>=0.10.0
+Pillow>=10.0.0
+pymupdf>=1.24.0
+rapidocr-onnxruntime>=1.3.0; python_version < "3.13"
+rapidocr-onnxruntime>=1.2.3,<1.3.0; python_version >= "3.13"
+
+# LangChain + 公司 ai-service（OpenAI 兼容模式）
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+pydantic>=2.0.0
+
+# 桌面应用打包（PyWebView + PyInstaller）
+pywebview>=5.0
+pyinstaller>=6.0

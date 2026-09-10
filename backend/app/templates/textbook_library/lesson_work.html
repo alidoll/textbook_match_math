@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>课时标注 · 教材库</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_library/lesson_work.css?v={{ static_v }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+</head>
+<body class="lib-lesson-work" data-ui-shell="{{ ui_shell|default('textbook_library') }}">
+  <header class="lw-hero">
+    <div class="lw-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        <a class="lw-back" id="lw-back" href="{{ intake_return_url|default('/textbook-library/', true) }}">← 返回本册入馆</a>
+      </nav>
+      <h1 id="page-title">课时标注</h1>
+      <p class="lw-lead" id="page-sub">加载中…</p>
+      <div class="lw-toolbar" role="toolbar" aria-label="OCR 操作">
+        <button type="button" class="btn btn-sm" id="btn-ocr-text" disabled>文字 OCR</button>
+        <button type="button" class="btn btn-sm secondary" id="btn-ocr-images" disabled>图片 OCR</button>
+        <button type="button" class="btn btn-sm secondary" id="btn-ocr-lesson-full" disabled title="对本课全部页依次跑文字 OCR 与图片 OCR">整课 OCR</button>
+        <button type="button" class="btn btn-sm secondary lw-advanced-btn" id="btn-curate-lesson" disabled title="合并零散原子；化学图核建块路径下慎用">AI 整理</button>
+        <button type="button" class="btn btn-sm secondary" id="btn-build-blocks" disabled title="按页语义分组（非科学）；化学图核建块；科学栏目聚类">建块</button>
+        <label class="lw-overlay-toggle">
+          <input type="checkbox" id="toggle-atom-overlay" checked>
+          <span>显示原子框</span>
+        </label>
+        <div class="lw-page-nav" id="page-nav" hidden>
+          <button type="button" class="btn btn-sm secondary" id="prev-page-btn">上一页</button>
+          <span class="lw-page-label" id="page-nav-label"></span>
+          <button type="button" class="btn btn-sm secondary" id="next-page-btn">下一页</button>
+        </div>
+      </div>
+      <p class="lw-status hint" id="lw-status" hidden></p>
+    </div>
+  </header>
+
+  <main class="lw-main">
+    <section class="lw-stage" id="stage-card">
+      <div class="lw-page-wrap" id="page-wrap">
+        <img id="page-img" alt="教材页" hidden>
+        <div class="lw-atom-overlay" id="atom-overlay" hidden></div>
+        <p class="lw-empty" id="page-empty">本课尚无页图。请先在本册入馆完成「一键生成页图」。</p>
+      </div>
+    </section>
+    <aside class="lw-atoms" id="atoms-panel">
+      <h2 class="lw-atoms-title">本页原子</h2>
+      <p class="hint" id="atoms-meta">未 OCR</p>
+      <ul class="lw-atom-list" id="atom-list"></ul>
+    </aside>
+  </main>
+
+  <script>
+    window.LESSON_UID = {{ lesson_uid|tojson }};
+    window.INTAKE_RETURN_URL = {{ intake_return_url|tojson }};
+    window.UI_SHELL = {{ ui_shell|default('textbook_library')|tojson }};
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="/static/textbook_library/lesson_work.js?v={{ static_v }}"></script>
+</body>
+</html>

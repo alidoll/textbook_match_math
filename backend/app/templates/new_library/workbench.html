@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新库建设 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+</head>
+<body class="workbench-page workbench-new">
+  <header class="wb-hero">
+    <div class="wb-hero-inner">
+      <a class="wb-back" href="{% if is_pipeline_shell %}/xiaoke-workbench/{% else %}/{% endif %}">← {% if is_pipeline_shell %}小科完整工作台{% else %}首页{% endif %}</a>
+      <h1>新库建设</h1>
+      <p class="wb-lead">新课标教材库 · 上传整册 PDF、解析划分课时、粗分对照旧库并建块</p>
+      <ol class="wb-flow" aria-label="建设流程">
+        <li><span class="wb-flow-num">1</span>上传 PDF · 识别目录 · 页码划分</li>
+        <li><span class="wb-flow-num">2</span>粗分对照 · 建块 · 对比</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="wb-main">
+    <section id="editions" class="wb-panel">
+      <p class="wb-loading">加载册次…</p>
+    </section>
+
+    <div id="tb-batch-park" hidden>
+      <input type="file" id="tb-batch-input" accept=".pdf,application/pdf" multiple hidden>
+      <div id="tb-batch-panel" class="tb-batch-panel" hidden>
+        <div class="tb-batch-panel-head">
+          <div class="tb-batch-panel-title">
+            <strong>本版新教材 PDF 导入</strong>
+            <span class="hint" id="tb-batch-summary"></span>
+          </div>
+          <div class="tb-batch-panel-actions">
+            <button type="button" class="btn btn-sm secondary" id="tb-batch-preview-btn" disabled>预览匹配</button>
+            <button type="button" class="btn btn-sm" id="tb-batch-upload-btn" disabled>确认上传</button>
+            <button type="button" class="btn btn-sm secondary" id="tb-batch-close">关闭</button>
+          </div>
+        </div>
+        <div class="table-wrap tb-batch-table-wrap">
+          <table class="tb-batch-table">
+            <thead>
+              <tr>
+                <th>PDF 文件</th>
+                <th>匹配册次</th>
+                <th>置信度</th>
+                <th>状态</th>
+                <th>上传进度</th>
+              </tr>
+            </thead>
+            <tbody id="tb-batch-rows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="ed-coarse-export-panel" class="tb-batch-panel ed-coarse-export-panel" hidden>
+        <div class="tb-batch-panel-head">
+          <div class="tb-batch-panel-title">
+            <strong>下载本版粗分结果</strong>
+            <span class="hint" id="ed-coarse-export-summary"></span>
+          </div>
+          <div class="tb-batch-panel-actions">
+            <button type="button" class="btn btn-sm" id="ed-coarse-export-dl" disabled>开始下载</button>
+            <button type="button" class="btn btn-sm secondary" id="ed-coarse-export-close">关闭</button>
+          </div>
+        </div>
+        <div class="ed-coarse-export-filters">
+          <label><input type="checkbox" id="ed-coarse-include-matched" checked> 已匹配课时</label>
+          <label><input type="checkbox" id="ed-coarse-include-unmatched" checked> 未匹配课时</label>
+          <button type="button" class="btn btn-sm secondary" id="ed-coarse-select-all">全选有结果册</button>
+          <button type="button" class="btn btn-sm secondary" id="ed-coarse-select-none">全不选</button>
+        </div>
+        <div class="table-wrap tb-batch-table-wrap">
+          <table class="tb-batch-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>册次</th>
+                <th>已匹配</th>
+                <th>未匹配</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="ed-coarse-export-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="wb-toast" hidden></div>
+  <script src="/static/new_library/workbench.js?v={{ static_v }}"></script>
+</body>
+</html>

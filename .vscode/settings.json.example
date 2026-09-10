@@ -1,0 +1,39 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
+  "python.analysis.exclude": [
+    "**/.venv",
+    "**/venv",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "data",
+    "outputs",
+    "dist",
+    "Unlimited-OCR-main",
+    "data_upload",
+    "**/tmp_*"
+  ],
+  "files.watcherExclude": {
+    "**/.venv/**": true,
+    "**/data/old-textbook/**": true,
+    "**/data/new-textbook/**": true,
+    "**/data/lesson-pages/**": true,
+    "**/data/diff-textbook/**": true,
+    "**/data/base_data/cache/**": true,
+    "**/data/exports/**": true,
+    "**/outputs/**": true,
+    "**/dist/**": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/data/old-textbook": true,
+    "**/data/new-textbook": true,
+    "**/data/lesson-pages": true,
+    "**/data/diff-textbook": true,
+    "**/data/base_data/cache": true,
+    "**/outputs": true,
+    "**/dist": true
+  },
+  "terminal.integrated.cwd": "${workspaceFolder}"
+}

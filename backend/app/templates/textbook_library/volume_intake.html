@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>本册入馆 · 教材库</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/intake.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_library/volume_intake.css?v={{ static_v }}">
+</head>
+<body class="intake-page intake-page--new lib-volume-intake" data-ui-shell="{{ ui_shell|default('textbook_library') }}">
+  <header class="intake-hero intake-hero--new">
+    <div class="intake-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        <a class="intake-back" id="intake-back" href="/textbook-library/">← 册次格</a>
+      </nav>
+      <h1 id="page-title">本册入馆</h1>
+      <p class="intake-lead" id="intake-lead">上传 PDF · 整册预处理（识别目录 → 划分页码 → 生成页图）</p>
+      <div class="intake-meta" id="page-sub">加载中…</div>
+      <ol class="wb-flow lib-preprocess-flow" aria-label="预处理进度" id="intake-flow">
+        <li id="flow-step-1"><span class="wb-flow-num">1</span>上传 PDF</li>
+        <li id="flow-step-2"><span class="wb-flow-num">2</span>识别目录</li>
+        <li id="flow-step-3"><span class="wb-flow-num">3</span>划分页码 · 页图</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="intake-main">
+    <div class="intake-steps-grid intake-steps-grid--new">
+      <section class="intake-panel intake-step" id="upload-card">
+        <div class="intake-step-head">
+          <span class="intake-step-num">1</span>
+          <h2 class="section-title">上传教材 PDF</h2>
+        </div>
+        <p class="hint">完整版扫描 PDF（全书）。上传后将自动依次识别目录、划分页码并生成页图。若要换书：再点「选择 PDF」后点「重新上传」（会清空本册已识别课时并重跑预处理）。</p>
+        <div class="pdf-upload-actions">
+          <label class="btn secondary pdf-file-btn">
+            <input type="file" id="pdf-input" accept="application/pdf,.pdf">选择 PDF
+          </label>
+          <button type="button" class="btn pdf-upload-btn pdf-upload-btn-idle" id="upload-btn" disabled>上传 PDF</button>
+        </div>
+        <div id="pdf-upload-hint" class="pdf-upload-hint" hidden></div>
+        <div id="pdf-meta" class="pdf-meta intake-info-box" hidden></div>
+      </section>
+
+      <section class="intake-panel intake-step" id="process-card">
+        <div class="intake-step-head">
+          <span class="intake-step-num">2</span>
+          <h2 class="section-title" id="process-title">整册预处理</h2>
+        </div>
+        <p class="hint" id="process-hint">上传 PDF 后自动依次：识别目录 → 划分页码 → 生成页图（也可手动重跑）。<span id="page-layout-hint"></span></p>
+        <div id="full-process-btns" class="diff-process-btns">
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="catalog-btn" disabled>识别目录</button>
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="parse-btn" disabled>划分页码</button>
+          <button type="button" class="btn intake-step-btn intake-step-btn-idle" id="build-pages-btn" disabled>一键生成页图</button>
+          <button type="button" class="btn secondary" id="pipeline-btn" disabled>一键预处理</button>
+        </div>
+        <div id="catalog-meta" class="pdf-meta intake-info-box" hidden></div>
+        <div id="parse-meta" class="pdf-meta intake-info-box intake-info-box--warn" hidden></div>
+        <div id="pages-meta" class="pdf-meta intake-info-box" hidden></div>
+      </section>
+    </div>
+
+    <section class="intake-panel intake-lessons" id="lessons-card" hidden>
+      <div class="intake-step-head intake-step-head--lessons">
+        <span class="intake-step-num">3</span>
+        <h2 class="section-title">课时目录</h2>
+        <span class="intake-lessons-hint">页码校对 · 页图状态</span>
+        <button type="button" class="btn secondary" id="volume-ocr-btn" disabled title="对有页图的课时依次：整课 OCR → 语义/栏目建块（可离开本页）">整册 OCR+建块</button>
+      </div>
+      <div id="volume-ocr-meta" class="pdf-meta intake-info-box" hidden></div>
+      <div class="table-wrap">
+        <table class="intake-table">
+          <thead>
+            <tr>
+              <th>单元</th>
+              <th>课时</th>
+              <th>页码</th>
+              <th>页图</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="lesson-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="intake-toast" hidden></div>
+  <div id="page-preview" class="page-preview" aria-hidden="true">
+    <div class="page-preview-inner">
+      <header class="page-preview-head">
+        <strong id="preview-title"></strong>
+        <button type="button" class="btn secondary" id="preview-close">关闭</button>
+      </header>
+      <div class="page-preview-body">
+        <div id="preview-grid" class="preview-grid"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.LIBRARY_INTAKE_CODE = {{ volume_code|tojson }};
+    window.LIBRARY_API_PREFIX = '/api/textbook-library';
+    window.LIBRARY_LESSON_API_PREFIX = '/api/textbook-diff';
+  </script>
+  {% include "_distribution_boot.html" %}
+  <script src="/static/textbook_library/volume_intake.js?v={{ static_v }}"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+.cw-main { max-width: 900px; margin: 0 auto; padding: 1rem; }
+.cw-card { background: #fff; border: 1px solid #e8e0d8; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.cw-hint { font-size: 13px; color: #64748b; margin: 0 0 0.75rem; line-height: 1.45; }
+.cw-status { font-size: 14px; margin: 0 0 0.75rem; padding: 0.5rem 0.65rem; border-radius: 6px; background: #f8fafc; color: #334155; }
+.cw-status.is-ok { background: #ecfdf5; color: #047857; }
+.cw-status.is-err { background: #fef2f2; color: #b91c1c; }
+.cw-status.is-busy { background: #fff7ed; color: #c2410c; }
+.cw-btn { margin-left: 0.5rem; padding: 0.35rem 0.75rem; border: 1px solid #2a6f7a; background: #2a6f7a; color: #fff; border-radius: 4px; cursor: pointer; }
+.cw-table { width: 100%; border-collapse: collapse; }
+.cw-table td, .cw-table th { border-bottom: 1px solid #eee; padding: 0.4rem; text-align: left; }

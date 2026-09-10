@@ -1,0 +1,22 @@
+/* 全局品牌色（原蓝色系 → 青绿/teal） */
+:root {
+  --line: #e2e8f0;
+  --bg: #f1f5f9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #0d9488;
+  --primary-dark: #0f766e;
+  --primary-light: #14b8a6;
+  --primary-lighter: #2dd4bf;
+  --primary-pale: #ccfbf1;
+  --primary-hero-start: #134e4a;
+  --primary-hero-mid: #0d9488;
+  --primary-hero-end: #2dd4bf;
+  --primary-glow: rgba(13, 148, 136, 0.35);
+  --primary-ring: rgba(13, 148, 136, 0.45);
+  /* 对照页：新教材侧高亮（与品牌色一致） */
+  --accent-new: #0d9488;
+  --accent-new-light: #14b8a6;
+  --accent-new-dark: #0f766e;
+  --accent-new-bg: rgba(13, 148, 136, 0.12);
+}

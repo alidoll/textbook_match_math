@@ -1,0 +1,102 @@
+{
+  "lesson_uid": "湘科版-2-下-old-U1-L1",
+  "lesson_name": "推拉游戏",
+  "unit_title": "第一单元 推力与拉力",
+  "description": "人工锁定建块标杆（2026-06-26 导出）。AI 建块须仿照此课的切分粒度、课件页绑定与 atom 对应关系。",
+  "source_note": "同步自 data/backup_湘科版-2-下-old-U1-L1_推拉游戏.json",
+  "blocks": [
+    {
+      "block_code": "B01",
+      "stage_ref": "课件名称页",
+      "topic_name": "题目推拉游戏",
+      "course_slide_indices": [1],
+      "atom_codes": ["A001-001"],
+      "atom_excerpts": ["1推推拉游戏"],
+      "binding_hint": "课件标题页 ↔ 教材课节标题条"
+    },
+    {
+      "block_code": "B02",
+      "stage_ref": "导入",
+      "topic_name": "课件：推拉门、马拉车、大象推车导入",
+      "course_slide_indices": [2, 3],
+      "atom_codes": [],
+      "binding_hint": "仅课件导入，本课教材无对应原子"
+    },
+    {
+      "block_code": "B03",
+      "stage_ref": "实验/活动操作",
+      "topic_name": "活动：推手游戏",
+      "course_slide_indices": [4, 5],
+      "atom_codes": ["A001-002", "A001-004", "A001-005"],
+      "atom_excerpts": ["推推手与拔河游戏", "游戏中后移动脚者为胜"],
+      "binding_hint": "课件推手游戏步骤 ↔ 教材活动条+插图+规则句（画面一致）"
+    },
+    {
+      "block_code": "B04",
+      "stage_ref": "实验/活动操作",
+      "topic_name": "活动：拔河游戏",
+      "course_slide_indices": [6, 7],
+      "atom_codes": ["A001-006", "A001-007"],
+      "atom_excerpts": ["游戏中后松开小棍或后移动脚者为胜"],
+      "binding_hint": "课件拔河 ↔ 教材拔河插图与说明，与 B03 推手拆开"
+    },
+    {
+      "block_code": "B05",
+      "stage_ref": "实验/活动操作",
+      "topic_name": "课件：推和拉情境图；教材：还在什么情况下用到了推和拉",
+      "course_slide_indices": [8, 9, 10],
+      "atom_codes": ["A001-008", "A001-009"],
+      "atom_excerpts": ["你还在什么情况下用到了推和拉"],
+      "binding_hint": "课件弹簧/推箱子等 ↔ 教材提问句+情境插图，勿与 B03/B04 活动条混淆"
+    },
+    {
+      "block_code": "B06",
+      "stage_ref": "知识点讲解",
+      "topic_name": "推力和拉力是常见的力",
+      "course_slide_indices": [11],
+      "atom_codes": ["A002-006"],
+      "binding_hint": "概念讲解页 ↔ 教材 p2 对应知识点句"
+    },
+    {
+      "block_code": "B07",
+      "stage_ref": "实验/活动操作",
+      "topic_name": "课件：生活推力拉力实例图集；教材：生活例子",
+      "course_slide_indices": [12, 13, 14, 15],
+      "atom_codes": ["A002-007", "A002-010", "A002-011", "A002-012", "A002-013"],
+      "binding_hint": "多页课件实例 ↔ 教材 p2 多幅插图原子"
+    },
+    {
+      "block_code": "B08",
+      "stage_ref": "实验/活动操作",
+      "topic_name": "课件：手提书包；教材：推和拉的不同感觉",
+      "course_slide_indices": [16],
+      "atom_codes": ["A002-001", "A002-002", "A002-003", "A002-004", "A002-005"],
+      "atom_excerpts": ["推和拉，你的感觉有什么不同", "我拉它，它也拉我"],
+      "binding_hint": "典型：单页课件画面 ↔ 教材 p2 对话+插图整块匹配"
+    },
+    {
+      "block_code": "B09",
+      "stage_ref": "典例剖析",
+      "topic_name": "课件：拉力判断例题；拔河用什么力",
+      "course_slide_indices": [17, 18],
+      "atom_codes": [],
+      "binding_hint": "仅课件例题"
+    },
+    {
+      "block_code": "B10",
+      "stage_ref": "知识小结",
+      "topic_name": "课件：推手拔河与推拉小结",
+      "course_slide_indices": [19],
+      "atom_codes": [],
+      "binding_hint": "课件小结页"
+    },
+    {
+      "block_code": "B11",
+      "stage_ref": "课件尾页（练习提醒）",
+      "topic_name": "课件：一起来做练习吧",
+      "course_slide_indices": [20],
+      "atom_codes": [],
+      "binding_hint": "尾页"
+    }
+  ]
+}

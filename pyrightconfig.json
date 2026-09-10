@@ -1,0 +1,26 @@
+{
+  "include": ["backend", "tests", "scripts", "migrations"],
+  "exclude": [
+    "**/.venv",
+    "**/venv",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/node_modules",
+    "data",
+    "outputs",
+    "dist",
+    "Unlimited-OCR-main",
+    "data_upload",
+    "tmp_*",
+    "**/tmp_*",
+    "**/*.png",
+    "**/*.pdf",
+    "**/*.zip",
+    "**/*.xlsx",
+    "**/*.xls"
+  ],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
+  "extraPaths": ["backend"]
+}

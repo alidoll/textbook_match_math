@@ -1,0 +1,44 @@
+/* 教材库本册入馆 — 预处理壳（对齐 diff intake，无修订版/粗分/课件） */
+.lib-volume-intake .lib-preprocess-flow {
+  margin: 12px 0 0;
+}
+
+.lib-volume-intake .diff-process-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.lib-volume-intake #pipeline-btn:not(:disabled) {
+  border: 1px dashed rgba(15, 23, 42, 0.25);
+}
+
+.lib-volume-intake .lesson-work-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #be185d;
+  text-decoration: none;
+}
+
+.lib-volume-intake .lesson-work-link:hover {
+  text-decoration: underline;
+}
+
+.lib-volume-intake .intake-step-head--lessons {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lib-volume-intake .intake-step-head--lessons .intake-lessons-hint {
+  margin-left: 0;
+}
+
+.lib-volume-intake .intake-step-head--lessons #volume-ocr-btn {
+  margin-left: auto;
+}
+
+.lib-volume-intake .intake-step-head--lessons #volume-ocr-btn:not(:disabled) {
+  border-color: rgba(190, 24, 93, 0.35);
+  color: #be185d;
+}

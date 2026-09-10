@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>旧库建设 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+</head>
+<body class="workbench-page workbench-old">
+  <header class="wb-hero">
+    <div class="wb-hero-inner">
+      <a class="wb-back" href="{% if is_pipeline_shell %}/xiaoke-workbench/{% else %}/{% endif %}">← {% if is_pipeline_shell %}小科完整工作台{% else %}首页{% endif %}</a>
+      <h1>旧库建设</h1>
+      <p class="wb-lead">旧课标教材库 · 按册完成 PDF、课次拆分、课件入库与教学建块</p>
+      <ol class="wb-flow" aria-label="建设流程">
+        <li><span class="wb-flow-num">1</span>载入本版基准目录</li>
+        <li><span class="wb-flow-num">2</span>导入本版教材 PDF</li>
+        <li><span class="wb-flow-num">3</span>本版解析 · 进册建设</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="wb-main">
+    <section id="editions" class="wb-panel">
+      <p class="wb-loading">加载册次…</p>
+    </section>
+
+    <!-- 面板挂到工具栏下方（#tb-batch-mount）；此处仅作重绘时的暂存，避免被 innerHTML 清掉 -->
+    <div id="tb-batch-park" hidden>
+      <input type="file" id="tb-batch-input" accept=".pdf,application/pdf" multiple hidden>
+      <div id="tb-batch-panel" class="tb-batch-panel" hidden>
+        <div class="tb-batch-panel-head">
+          <div class="tb-batch-panel-title">
+            <strong>本版教材 PDF 导入</strong>
+            <span class="hint" id="tb-batch-summary"></span>
+          </div>
+          <div class="tb-batch-panel-actions">
+            <button type="button" class="btn btn-sm secondary" id="tb-batch-preview-btn" disabled title="按文件名自动匹配到各册">预览匹配</button>
+            <button type="button" class="btn btn-sm" id="tb-batch-upload-btn" disabled title="核对匹配后写入各册">确认上传</button>
+            <button type="button" class="btn btn-sm secondary" id="tb-batch-close">关闭</button>
+          </div>
+        </div>
+        <div class="table-wrap tb-batch-table-wrap">
+          <table class="tb-batch-table">
+            <thead>
+              <tr>
+                <th>PDF 文件</th>
+                <th>匹配册次</th>
+                <th>置信度</th>
+                <th>状态</th>
+                <th>上传进度</th>
+              </tr>
+            </thead>
+            <tbody id="tb-batch-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="wb-toast" hidden></div>
+  <script src="/static/old_library/bootstrap_all.js?v={{ static_v }}"></script>
+  <script src="/static/old_library/workbench.js?v={{ static_v }}"></script>
+</body>
+</html>

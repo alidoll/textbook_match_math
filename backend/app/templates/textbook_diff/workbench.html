@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if book_type == "diff_old" %}旧教材{% else %}新教材{% endif %}上传 · 教材对比</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+</head>
+<body class="workbench-page workbench-new">
+  <header class="wb-hero">
+    <div class="wb-hero-inner">
+      <nav class="app-top-nav" aria-label="顶部导航">
+        <a class="wb-back" id="wb-back-diff" href="/textbook-diff/">← 选择学科</a>
+      </nav>
+      <h1>{% if book_type == "diff_old" %}旧教材{% else %}新教材{% endif %}上传</h1>
+      <p class="wb-lead" id="wb-lead">上传整册 PDF，识别目录，划分页码，生成页图</p>
+      <ol class="wb-flow" aria-label="建设流程">
+        <li><span class="wb-flow-num">1</span>上传 PDF · 识别目录 · 划分页码</li>
+        <li><span class="wb-flow-num">2</span>生成页图 · 对比</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="wb-main">
+    <section class="wb-panel" id="editions">
+      <p class="wb-loading">加载册次…</p>
+    </section>
+  </main>
+
+  <div id="toast" class="wb-toast" hidden></div>
+  <script>
+    window.DIFF_BOOK_TYPE = {{ book_type|tojson }};
+  </script>
+  {% include "_distribution_boot.html" %}
+  <script src="/static/textbook_diff/subjects.js?v={{ static_v }}"></script>
+  <script src="/static/textbook_diff/workbench.js?v={{ static_v }}"></script>
+</body>
+</html>

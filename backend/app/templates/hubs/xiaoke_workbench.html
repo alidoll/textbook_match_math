@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小科完整工作台 · 教材匹配系统</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/home.css?v={{ static_v }}">
+</head>
+<body class="home-page home-page-hub">
+  <header class="home-hero">
+    <div class="home-hero-inner">
+      <p class="home-hub-back"><a href="/">← 首页</a></p>
+      <h1>小科完整工作台</h1>
+      <p class="home-lead">现网小学科学能力打包保留；试验新链路时仍可从这里进入原流程</p>
+    </div>
+  </header>
+
+  <nav class="home-actions" aria-label="小科现网入口">
+    <a class="home-action-card home-action-old" href="/old-library/">
+      <span class="home-action-step">现网 · 01</span>
+      <h2>旧库建设</h2>
+      <p class="home-action-desc">上传整册 PDF、课次拆分、旧课件入库与教学区块标注</p>
+      <span class="home-action-cta">进入旧库建设 →</span>
+    </a>
+    <a class="home-action-card home-action-new" href="/new-library/">
+      <span class="home-action-step">现网 · 02</span>
+      <h2>新库建设</h2>
+      <p class="home-action-desc">上传整册 PDF、解析划分课时、粗分对照旧库并建块</p>
+      <span class="home-action-cta">进入新库建设 →</span>
+    </a>
+    <a class="home-action-card home-action-compare" href="/new-library/compare-results">
+      <span class="home-action-step">现网 · 03</span>
+      <h2>新旧对比结果</h2>
+      <p class="home-action-desc">按课终审区块复用判定，批量导出对比与改稿清单</p>
+      <span class="home-action-cta">查看对比结果 →</span>
+    </a>
+  </nav>
+
+  <footer class="home-footer">xiaoke-workbench · 不拆解现网能力</footer>
+</body>
+</html>

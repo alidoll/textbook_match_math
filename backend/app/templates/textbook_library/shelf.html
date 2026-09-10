@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>教材库 · 馆藏入馆</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/home.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/textbook_library/shelf.css?v={{ static_v }}">
+</head>
+<body class="lib-page">
+  <header class="lib-top">
+    <a class="lib-back" href="/">← 首页</a>
+    <h1 class="lib-title">教材库</h1>
+    <p class="lib-lead">化学 / 数学 / 科学 / 生物 · 版本 × 册次入馆（不分旧/新）</p>
+  </header>
+  <nav class="lib-subjects" id="lib-subjects" aria-label="学科"></nav>
+  <nav class="lib-editions" id="lib-editions" aria-label="版本"></nav>
+  <section class="lib-case" aria-label="馆藏架">
+    <div class="lib-cornice" aria-hidden="true"></div>
+    <div class="lib-grid" id="lib-grid">
+      <p class="lib-empty">加载馆藏…</p>
+    </div>
+    <div class="lib-plank" aria-hidden="true"></div>
+  </section>
+  <script src="/static/textbook_library/shelf.js?v={{ static_v }}"></script>
+</body>
+</html>

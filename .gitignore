@@ -1,0 +1,89 @@
+git add scripts/sync_db_to_remote.py  
+.env
+.env.local
+*.local
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/settings.json.example
+*.swp
+Thumbs.db
+Desktop.ini
+
+# 本地调试输出
+_content_sim_debug.json
+_test_run_out.txt
+tmp_*
+/backup_*.sql
+/tmp_pid.txt
+
+# 基准 xlsx 体积大、常更新，不提交；README 保留
+data/base_data/*.xlsx
+data/base_data/*.xls
+
+# 对照表金标（仓库根目录，本地使用）
+比对结果.xlsx
+对比结果.xlsx
+AI判断结果修正表.xlsx
+
+# LLM 目录解析本地缓存（按 PDF hash 生成）
+data/base_data/cache/
+
+# 教材 PDF / 课件 / 页图（体积大，走 MySQL 或网盘，不进 Git）
+data/old-textbook/
+data/new-textbook/
+data/lesson-pages/
+data/old-ppt/
+
+# 本地 SQLite 数据库文件（含 WAL/SHM 侧车）
+data/textbook_match.db
+data/textbook_match.db-wal
+data/textbook_match.db-shm
+
+# 旧教材 PDF 镜像（主存在 file_blobs）
+data/old-textbook/**/*.pdf
+
+# 解析生成的教材页 PNG
+data/lesson-pages/**/*.png
+
+# 分发 zip 产物（scripts/pack_test_diff_dist.py；仅仓库根目录）
+/dist/
+
+# PyInstaller 打包产物
+/build/
+
+# 导出 JSON 快照（可选本地生成）
+outputs/
+data/exports/*.sql
+data/exports/*.zip
+data/_atom_compare.txt
+data/_atom_frag_compare.json
+data/_ocr_compare.json
+
+# 本地 mysqldump 备份（migrations/ 迁移脚本仍需提交）
+backup.sql
+backup_fixed.sql
+backup_utf8.sql
+backup_clean.sql
+backup.sql.utf8.tmp
+data/db-backup/
+
+# 第三方工具目录（本地使用，不进 Git）
+Unlimited-OCR-main/
+
+data_upload/
+
+# �̲ĶԱȱ��� PDF
+data/diff-textbook/
+env(1)
+env(2)
+
+# Git worktrees (local isolation)
+.worktrees/
+

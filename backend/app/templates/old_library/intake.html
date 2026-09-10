@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if ui_shell == 'textbook_library' %}本册入馆{% else %}本册建设 · 旧库{% endif %}</title>
+  {% include "_favicon.html" %}
+  {% include "_theme_css.html" %}
+  <link rel="stylesheet" href="/static/old_library/workbench.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/static/old_library/intake.css?v={{ static_v }}">
+</head>
+<body class="intake-page" data-ui-build="{{ static_v }}" data-ui-shell="{{ ui_shell|default('old_library') }}">
+  <header class="intake-hero">
+    <div class="intake-hero-inner">
+      {% if ui_shell == 'textbook_library' %}
+      <a class="intake-back" id="intake-back-link" href="#">← 馆藏架</a>
+      {% else %}
+      <a class="intake-back" id="intake-back-link" href="/old-library/">← 旧库建设</a>
+      {% endif %}
+      <h1 id="page-title">{% if ui_shell == 'textbook_library' %}本册入馆{% else %}本册建设{% endif %}</h1>
+      <div class="intake-meta" id="page-sub">加载中…</div>
+    </div>
+  </header>
+
+  <main class="intake-main">
+    <nav class="volume-pipeline intake-panel" id="volume-pipeline" aria-label="本册建设进度" hidden>
+      <div class="volume-pipeline-track" id="volume-pipeline-track">
+        <div class="volume-pipeline-rail" id="volume-pipeline-rail" aria-hidden="true"></div>
+        <div class="volume-pipeline-fill" id="volume-pipeline-fill" aria-hidden="true"></div>
+        <div class="volume-pipeline-walker" id="volume-pipeline-walker" aria-hidden="true" title="建设进度">
+          <svg class="walker-svg" viewBox="0 0 32 40" width="28" height="35" aria-hidden="true">
+            <ellipse class="walker-shadow" cx="16" cy="37" rx="9" ry="2.5"/>
+            <circle class="walker-head" cx="16" cy="8" r="6"/>
+            <rect class="walker-body" x="11" y="14" width="10" height="12" rx="3"/>
+            <g class="walker-leg-l"><line x1="14" y1="26" x2="12" y2="34"/></g>
+            <g class="walker-leg-r"><line x1="18" y1="26" x2="20" y2="34"/></g>
+            <g class="walker-arm-l"><line x1="11" y1="17" x2="6" y2="22"/></g>
+            <g class="walker-arm-r"><line x1="21" y1="17" x2="26" y2="22"/></g>
+          </svg>
+        </div>
+        <ol class="volume-pipeline-nodes" id="volume-pipeline-steps"></ol>
+      </div>
+    </nav>
+
+    <div class="intake-steps-grid">
+      <section class="intake-panel intake-step" id="upload-card">
+        <div class="intake-step-head">
+          <span class="intake-step-num">1</span>
+          <h2 class="section-title">上传整册 PDF</h2>
+        </div>
+        <p class="hint">主存写入数据库，并镜像到 <code>data/old-textbook/{版本}/{volume_code}.pdf</code></p>
+        <div class="pdf-upload-actions">
+          <label class="btn secondary pdf-file-btn">
+            <input type="file" id="pdf-input" accept="application/pdf,.pdf">
+            选择 PDF 文件
+          </label>
+          <button type="button" class="btn pdf-upload-btn pdf-upload-btn-idle" id="upload-btn" disabled>确认上传</button>
+        </div>
+        <div id="pdf-upload-hint" class="pdf-upload-hint" hidden></div>
+        <div id="pdf-meta" class="pdf-meta intake-info-box" hidden></div>
+      </section>
+
+      <section class="intake-panel intake-step" id="parse-card">
+        <div class="intake-step-head">
+          <span class="intake-step-num">2</span>
+          <h2 class="section-title">解析 PDF</h2>
+        </div>
+        <p class="hint">页码为 PDF 物理页（从 1 起算）。解析完成后自动落库；改页码后点「保存」会覆盖该课旧数据并重新生成页图。已校对的课再次解析时不会被覆盖。</p>
+        <button type="button" class="btn" id="parse-btn">开始解析</button>
+        <button type="button" class="btn secondary" id="btn-library-bootstrap" hidden>从基准库载入目录</button>
+        <div id="parse-hint" class="pdf-upload-hint" hidden></div>
+        <div id="parse-meta" class="pdf-meta intake-info-box intake-info-box--warn" hidden></div>
+      </section>
+    </div>
+
+    <section class="intake-panel intake-lessons" id="lessons-card" hidden>
+      <div class="intake-step-head intake-lessons-head">
+        <div>
+          <span class="intake-step-num">3</span>
+          <h2 class="section-title">课时目录</h2>
+          <span class="intake-lessons-hint">{% if ui_shell == 'textbook_library' %}页码校对 · OCR / 建块{% else %}课件上传 · 页码校对 · 建块{% endif %}</span>
+        </div>
+        <div class="intake-lessons-actions">
+          {% if ui_shell != 'textbook_library' %}
+          <label class="btn btn-sm cw-batch-trigger-btn" id="cw-batch-trigger" title="一次选中本册多个课件 ZIP，选完后在下方面板匹配并上传">
+            <input type="file" id="cw-batch-input" accept=".zip,application/zip" multiple hidden>
+            整册上传 ZIP
+          </label>
+          {% endif %}
+          <button type="button" class="btn btn-sm block-batch-run-btn" id="block-batch-run-btn" title="{% if ui_shell == 'textbook_library' %}对本册各课：文字 OCR → 整理 → 建块 → 核对保存{% else %}对本册已有课件的课：文字 OCR → 图片 OCR → 建块 → 核对保存{% endif %}">{% if ui_shell == 'textbook_library' %}整册 OCR / 建块{% else %}整册建块{% endif %}</button>
+        </div>
+      </div>
+      <p class="block-batch-hint hint" id="block-batch-hint" hidden>
+        整册建块进行中（文字 OCR → 图片 OCR → 建块）：点「建块 / 核对」将在<strong>新标签</strong>打开，本页继续刷新进度，可随时切回查看。
+        <button type="button" class="linkish block-batch-cancel-btn" id="block-batch-cancel-btn">取消任务</button>
+      </p>
+      {% if ui_shell != 'textbook_library' %}
+      <div id="cw-batch-panel" class="cw-batch-panel" hidden>
+        <div class="cw-batch-panel-head">
+          <div class="cw-batch-panel-title">
+            <strong>整册课件上传</strong>
+            <span class="hint" id="cw-batch-summary"></span>
+          </div>
+          <div class="cw-batch-panel-actions">
+            <button type="button" class="btn btn-sm secondary" id="cw-batch-preview-btn" disabled title="按文件名/课件 id 自动匹配到各课">预览匹配</button>
+            <button type="button" class="btn btn-sm cw-batch-upload-btn" id="cw-batch-upload-btn" disabled title="核对匹配后写入各课">确认上传</button>
+            <button type="button" class="btn btn-sm secondary" id="cw-batch-close">关闭</button>
+          </div>
+        </div>
+        <div class="table-wrap cw-batch-table-wrap">
+          <table class="intake-table cw-batch-table">
+            <thead>
+              <tr>
+                <th>ZIP 文件</th>
+                <th>匹配课时</th>
+                <th>置信度</th>
+                <th>状态</th>
+                <th>上传进度</th>
+              </tr>
+            </thead>
+            <tbody id="cw-batch-rows"></tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+      <div class="table-wrap">
+        <table class="intake-table">
+          <thead>
+            <tr>
+              <th>单元</th>
+              <th>节</th>
+              <th>课号 / 标识</th>
+              <th>页码</th>
+              <th>页图</th>
+              <th id="intake-col-annotate">{% if ui_shell == 'textbook_library' %}OCR / 建块{% else %}课件 / 建块{% endif %}</th>
+            </tr>
+          </thead>
+          <tbody id="lesson-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="intake-toast" hidden></div>
+  <div id="block-batch-modal" class="intake-modal" hidden role="dialog" aria-labelledby="block-batch-modal-title">
+    <div class="intake-modal-panel">
+      <h3 id="block-batch-modal-title">{% if ui_shell == 'textbook_library' %}整册 OCR / 建块{% else %}整册建块{% endif %}</h3>
+      <p class="hint" id="block-batch-modal-body"></p>
+      <fieldset class="block-batch-modal-options">
+        <legend class="sr-only">处理方式</legend>
+        <label class="block-batch-option">
+          <input type="radio" name="block-batch-mode" value="skip" checked>
+          跳过已有区块的课时（默认）
+        </label>
+        <label class="block-batch-option">
+          <input type="radio" name="block-batch-mode" value="rebuild">
+          全部重建（含已保存锁定的课时，会先解锁）
+        </label>
+      </fieldset>
+      <ul id="block-batch-modal-list" class="block-batch-modal-list"></ul>
+      <div class="intake-modal-actions">
+        <button type="button" class="btn secondary" id="block-batch-modal-cancel">取消</button>
+        <button type="button" class="btn" id="block-batch-modal-start">开始建块</button>
+      </div>
+    </div>
+  </div>
+  <div id="page-preview" class="page-preview" aria-hidden="true">
+    <div class="page-preview-inner">
+      <header class="page-preview-head">
+        <strong id="preview-title"></strong>
+        <button type="button" class="btn secondary" id="preview-close">关闭</button>
+      </header>
+      <div class="page-preview-body">
+        <div id="preview-grid" class="preview-grid"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.INTAKE_VOLUME_CODE = {{ volume_code|tojson }};
+    window.UI_SHELL = {{ (ui_shell|default('old_library'))|tojson }};
+  </script>
+  <script src="/static/old_library/intake.js?v={{ static_v }}"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+.diff-preview-loading { color: #666; padding: 24px 0; text-align: center; }
+.diff-preview-meta--warn { color: #b45309; margin-top: 8px; }
+.diff-intake-compare .diff-intake-steps { padding: 16px; margin-bottom: 16px; }
+.diff-intake-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.diff-intake-step-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface-2, #f4f4f5);
+  font-size: 13px;
+}
+.diff-intake-step-list li.is-done { background: #ecfdf3; color: #166534; }
+.diff-intake-step-list li.is-pending { background: #fff7ed; color: #9a3412; }
+.diff-intake-blockers { padding: 16px; margin-bottom: 16px; border-left: 4px solid #f97316; }
+.diff-intake-blockers ul { margin: 8px 0 0; padding-left: 18px; }
+.diff-intake-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.diff-intake-pair-label { font-size: 13px; color: var(--muted, #71717a); }
+.pdf-upload-actions .pdf-compare-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
