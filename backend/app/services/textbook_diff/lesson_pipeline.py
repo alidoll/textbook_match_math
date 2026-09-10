@@ -945,11 +945,15 @@ def cancel_pipeline(
             j["message"] = "正在取消…"
             j["updated_at"] = time.time()
             cancelled.append(dict(j))
-    from .xiaoke_ocr import cancel_xiaoke_volume_full
+    # 小科取消（非小科无此模块，跳过）
+    try:
+        from .xiaoke_ocr import cancel_xiaoke_volume_full
 
-    xk = cancel_xiaoke_volume_full(old_code=old_code, new_code=new_code)
-    if xk.get("cancelled"):
-        cancelled.append(xk.get("job") or {"kind": "xiaoke-volume-full"})
+        xk = cancel_xiaoke_volume_full(old_code=old_code, new_code=new_code)
+        if xk.get("cancelled"):
+            cancelled.append(xk.get("job") or {"kind": "xiaoke-volume-full"})
+    except ImportError:
+        pass
     if not cancelled:
         return {"ok": True, "cancelled": 0, "jobs": [], "message": "没有进行中的一键任务"}
     return {
