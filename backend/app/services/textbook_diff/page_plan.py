@@ -49,6 +49,32 @@ def store_diff_catalog_offset(
     return off
 
 
+def _extract_printed_page_number(text: str) -> int | None:
+    """从页面文字开头提取印刷页码（数学教材页眉常见："2 数学 八年级上册" 或 "第十二章 ... 3"）。"""
+    if not text:
+        return None
+    # 取前 3 行
+    head = text.strip()[:120]
+    for line in head.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        # 行首纯数字（如 "2  数学 八年级上册"）
+        import re
+        m = re.match(r"^(\d{1,3})\s", line)
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= 999:
+                return n
+        # 行尾纯数字（如 "第十二章 分式和分式方程 3"）
+        m = re.search(r"(\d{1,3})\s*$", line)
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= 999:
+                return n
+    return None
+
+
 def calibrate_diff_catalog_offset(
     pdf_path: Path,
     entries: list,
@@ -59,21 +85,16 @@ def calibrate_diff_catalog_offset(
     """
     自动推算目录逻辑页 → 系统页（single=sheet / spread=view）的固定偏移 x。
 
-    步骤：
-    1. 从目录缓存读取各课「逻辑起始页」
-    2. 在 PDF 文字层中跳过目录页，定位前两课正文起始 sheet
-    3. x = 系统页起始 − 逻辑起始；第二课在「逻辑 + x」处复核
-    4. 取最早通过复核的 x（避免前言区误匹配）
+    两阶段策略：
+    A) 页码直读法（优先，快且准）：从 PDF 每页文字开头提取印刷页码，
+       对前几课的目录页码 + 候选偏移范围，看印刷页码是否匹配
+    B) 课名锚点法（回退）：在窗口内搜索课名标题行
     """
     from ...parsers.pdf_spread import sheet_side_to_view, view_to_sheet_side
 
-    pages = extract_page_texts_pdfplumber(pdf_path)
-    if not pages:
-        return None
     max_off = _MAX_OFFSET_SPREAD if layout == "spread" else _MAX_OFFSET
 
     def _sheet_to_system(sheet_1: int) -> int:
-        # 对开：正文标题多在左半，sheet S → view 2S-1
         if layout == "spread":
             return sheet_side_to_view(sheet_1, "left")
         return sheet_1
@@ -93,76 +114,164 @@ def calibrate_diff_catalog_offset(
     if len(work) < 2:
         return None
 
-    toc_end = find_last_toc_page_index(pages, list(targets))
+    import fitz
+
+    doc = fitz.open(str(pdf_path))
+    total_sheets = len(doc)
+
+    # 取前 5 课做锚点
+    anchor_lessons = work[:min(5, len(work))]
+    cat_hints: list[int | None] = []
+    for les, _ in anchor_lessons:
+        cat_hints.append(
+            pick_toc_page_hint(
+                entries,
+                les.unit_title or "",
+                les.lesson_name or "",
+                str(les.lesson_no or ""),
+            )
+        )
+
+    les1, tgt1 = anchor_lessons[0]
+    cat1 = cat_hints[0]
+    if cat1 is None:
+        _log.warning("首课目录页码缺失：%s", pdf_path.name)
+        doc.close()
+        return None
+
+    # ---- 阶段 A：页码直读法 ----
+    # 对每个候选偏移 x，检查 cat_i + x 处的印刷页码是否 == cat_i
+    best_x: int | None = None
+    best_hits = 0
+
+    for x in range(_MIN_OFFSET, max_off + 1):
+        hits = 0
+        for idx, (les, tgt) in enumerate(anchor_lessons):
+            cat_i = cat_hints[idx]
+            if cat_i is None:
+                continue
+            sys_page = cat_i + x  # 1-based 系统页
+            sheet_0 = _system_to_sheet0(sys_page)
+            if 0 <= sheet_0 < total_sheets:
+                text = doc.load_page(sheet_0).get_text() or ""
+                printed = _extract_printed_page_number(text)
+                if printed == cat_i:
+                    hits += 1
+
+        if hits > best_hits:
+            best_hits = hits
+            best_x = x
+
+    if best_x is not None and best_hits >= 2:
+        mk = norm_text(
+            strip_lesson_seq(les1.lesson_name or "")
+        ) or norm_text(strip_lesson_seq(str(les1.lesson_no or "")))
+        _log.info(
+            "目录偏移自动校准（页码直读）%s：x=%d（%d/%d 锚点匹配；layout=%s）",
+            pdf_path.name,
+            best_x,
+            best_hits,
+            len(anchor_lessons),
+            layout,
+        )
+        doc.close()
+        return CatalogPdfOffset(
+            offset_first=best_x,
+            offset_default=best_x,
+            first_match_key=mk or les1.lesson_uid,
+            source="auto_calibrated",
+        )
+
+    _log.info(
+        "页码直读法未命中（best_x=%s, hits=%d/%d），回退课名锚点法：%s",
+        best_x,
+        best_hits,
+        len(anchor_lessons),
+        pdf_path.name,
+    )
+
+    # ---- 阶段 B：课名锚点法（回退）----
+    # 只提取前 20 页用于 toc 边界检测
+    head_pages: list[str] = []
+    for i in range(min(20, total_sheets)):
+        head_pages.append(doc.load_page(i).get_text() or "")
+
+    toc_end = find_last_toc_page_index(head_pages, list(targets))
     search_from = (toc_end + 1) if toc_end >= 0 else 0
 
     def _is_start(p0: int, tgt: dict) -> bool:
-        if p0 < 0 or p0 >= len(pages):
+        if 0 <= p0 < len(head_pages):
+            text = head_pages[p0]
+        elif 0 <= p0 < total_sheets:
+            text = doc.load_page(p0).get_text() or ""
+        else:
             return False
-        if is_toc_like_page(pages[p0], list(targets)):
+        if not text or len(text.strip()) < 4:
             return False
-        return page_likely_lesson_start(pages[p0], tgt)
+        if p0 < len(head_pages):
+            page_text = head_pages[p0]
+        else:
+            page_text = text
+        if is_toc_like_page(page_text, list(targets)):
+            return False
+        return page_likely_lesson_start(text, tgt)
 
-    les1, tgt1 = work[0]
-    les2, tgt2 = work[1]
-    cat1 = pick_toc_page_hint(
-        entries,
-        les1.unit_title or "",
-        les1.lesson_name or "",
-        str(les1.lesson_no or ""),
-    )
-    cat2 = pick_toc_page_hint(
-        entries,
-        les2.unit_title or "",
-        les2.lesson_name or "",
-        str(les2.lesson_no or ""),
-    )
-    if cat1 is None or cat2 is None or cat2 <= cat1:
-        return None
-
+    window_lo = max(search_from, cat1 - 1)
+    window_hi = min(total_sheets, cat1 + max_off + 2)
     p1_candidates = [
         p0 + 1
-        for p0 in range(search_from, len(pages))
+        for p0 in range(window_lo, window_hi)
         if _is_start(p0, tgt1)
     ]
-    if not p1_candidates:
-        _log.warning("未在 PDF 正文区定位首课锚点：%s", pdf_path.name)
-        return None
 
     for p1_sheet in p1_candidates:
         p1 = _sheet_to_system(p1_sheet)
         x = p1 - cat1
         if x < _MIN_OFFSET or x > max_off:
             continue
-        p2 = cat2 + x
-        sheet_max = len(pages)
-        system_max = sheet_max * 2 if layout == "spread" else sheet_max
-        if p2 < 1 or p2 > system_max:
-            continue
-        if not _is_start(_system_to_sheet0(p2), tgt2):
-            continue
 
-        mk = norm_text(strip_lesson_seq(les1.lesson_name or "")) or norm_text(
-            strip_lesson_seq(str(les1.lesson_no or ""))
-        )
+        hits = 0
+        for idx, (les, tgt) in enumerate(anchor_lessons):
+            cat_i = cat_hints[idx]
+            if cat_i is None:
+                continue
+            p_i = cat_i + x
+            if 1 <= p_i <= total_sheets:
+                if _is_start(_system_to_sheet0(p_i), tgt):
+                    hits += 1
+
+        if hits > best_hits:
+            best_hits = hits
+            best_x = x
+
+    doc.close()
+
+    if best_x is not None and best_hits >= 2:
+        mk = norm_text(
+            strip_lesson_seq(les1.lesson_name or "")
+        ) or norm_text(strip_lesson_seq(str(les1.lesson_no or "")))
         _log.info(
-            "目录偏移自动校准 %s：x=%d（逻辑 p%d → 系统页 p%d；逻辑 p%d → 系统页 p%d；layout=%s）",
+            "目录偏移自动校准（课名锚点）%s：x=%d（%d/%d 锚点匹配；layout=%s）",
             pdf_path.name,
-            x,
-            cat1,
-            p1,
-            cat2,
-            p2,
+            best_x,
+            best_hits,
+            len(anchor_lessons),
             layout,
         )
         return CatalogPdfOffset(
-            offset_first=x,
-            offset_default=x,
+            offset_first=best_x,
+            offset_default=best_x,
             first_match_key=mk or les1.lesson_uid,
             source="auto_calibrated",
         )
 
-    _log.warning("目录偏移自动校准失败（双锚点未对齐）：%s", pdf_path.name)
+    _log.warning(
+        "目录偏移自动校准失败（best_x=%s, hits=%d/%d）：%s",
+        best_x,
+        best_hits,
+        len(anchor_lessons),
+        pdf_path.name,
+    )
     return None
 
 
@@ -305,7 +414,13 @@ def compute_diff_lesson_page_plan(
 
     # 对开扫描：文字层按 sheet 索引，不能直接用 view 坐标做后记裁剪
     if pdf_path is not None and layout != "spread":
-        pages_text = extract_page_texts_pdfplumber(pdf_path)
+        # 用 fitz 提取文字层（比 pdfplumber 快 10 倍以上）
+        import fitz as _fitz
+
+        pages_text: list[str] = []
+        with _fitz.open(str(pdf_path)) as _doc:
+            for _i in range(len(_doc)):
+                pages_text.append(_doc.load_page(_i).get_text() or "")
         if pages_text:
             ends_full = trim_backmatter_pages(pages_text, starts_full, ends_full)
             for row in plan_rows:
